@@ -8,12 +8,40 @@ import Sidebar from './Layout/Sidebar';
 import RoomInfo from './Layout/RoomInfo';
 
 export default class Example extends React.Component {
-  render() {
+  componentDidMount() {
+    const _this = this;
     var firebase = setFirebaseConfig();
 
-    firebase.database().ref('/messages').once('value', function(snapshot) {
-      console.log(snapshot.val());
-    })
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        // User is signed in.
+        var displayName = user.displayName;
+        var email = user.email;
+        var emailVerified = user.emailVerified;
+        var photoURL = user.photoURL;
+        var isAnonymous = user.isAnonymous;
+        var uid = user.uid;
+        var providerData = user.providerData;
+
+        _this.setState({
+          name: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL
+        });
+
+      } else {
+        // User is signed out.
+        window.location.href = '/login';
+      }
+    });
+  }
+  state = {
+    name: '',
+    email: '',
+    photoURL: ''
+  };
+
+  render() {
     return (
       <div>
         <Row>

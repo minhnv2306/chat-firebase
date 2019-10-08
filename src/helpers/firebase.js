@@ -4,6 +4,7 @@ import * as firebase from 'firebase/app';
 // These imports load individual services into the firebase namespace.
 import 'firebase/auth';
 import 'firebase/database';
+import 'firebase/firestore';
 
 export default function setFirebaseConfig()
 {
