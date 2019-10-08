@@ -6,11 +6,13 @@ import setFirebaseConfig from './../helpers/firebase';
 import Header from './Layout/Header';
 import Sidebar from './Layout/Sidebar';
 import RoomInfo from './Layout/RoomInfo';
+import ChatBox from './Layout/ChatBox';
 
 export default class Example extends React.Component {
   componentDidMount() {
     const _this = this;
     var firebase = setFirebaseConfig();
+    var db = firebase.firestore();
 
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
@@ -24,10 +26,22 @@ export default class Example extends React.Component {
         var providerData = user.providerData;
 
         _this.setState({
-          name: user.displayName,
-          email: user.email,
-          photoURL: user.photoURL
+          user: {
+            name: user.displayName,
+            email: user.email,
+            photoURL: user.photoURL
+          }
         });
+
+        db.collection('users').where('id', '==', user.uid).get().then(function(snapshot) {
+          if (snapshot.size == 0) {
+            db.collection('users').add({
+              id: user.uid,
+              name: user.displayName,
+              email: user.email
+            });
+          }
+        })
 
       } else {
         // User is signed out.
@@ -36,9 +50,7 @@ export default class Example extends React.Component {
     });
   }
   state = {
-    name: '',
-    email: '',
-    photoURL: ''
+    user: {},
   };
 
   render() {
@@ -46,13 +58,13 @@ export default class Example extends React.Component {
       <div className="div-block">
         <Row>
           <Col span={4}>
-            <Sidebar />
+            <Sidebar user={this.state.user}/>
           </Col>
           <Col span={16}>
             <div id="frame">
               <div className="content">
                 <div className="contact-profile">
-                  <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
+                  <img src="https://www.w3schools.com/bootstrap/img_avatar3.png" alt="" />
                   <p>Harvey Specter</p>
                   <div className="social-media">
                     <i className="fa fa-facebook" aria-hidden="true"></i>
@@ -61,81 +73,12 @@ export default class Example extends React.Component {
                   </div>
                 </div>
                 <div className="messages">
-                  <ul>
-                    <li className="sent">
-                      <img src="http://emilcarlsson.se/assets/mikeross.png" alt="" />
-                      <p>How the hell am I supposed to get a jury to believe you when I am not even sure that I do?!</p>
-                    </li>
-                    <li className="replies">
-                      <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-                      <p>When you're backed against the wall, break the god damn thing down.</p>
-                    </li>
-                    <li className="replies">
-                      <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-                      <p>Excuses don't win championships.</p>
-                    </li>
-                    <li className="sent">
-                      <img src="http://emilcarlsson.se/assets/mikeross.png" alt="" />
-                      <p>Oh yeah, did Michael Jordan tell you that?</p>
-                    </li>
-                    <li className="replies">
-                      <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-                      <p>No, I told him that.</p>
-                    </li>
-                    <li className="replies">
-                      <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-                      <p>What are your choices when someone puts a gun to your head?</p>
-                    </li>
-                    <li className="sent">
-                      <img src="http://emilcarlsson.se/assets/mikeross.png" alt="" />
-                      <p>What are you talking about? You do what they say or they shoot you.</p>
-                    </li>
-                    <li className="replies">
-                      <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-                      <p>Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do any one of a hundred and forty six other things.</p>
-                    </li>
-                    <li className="sent">
-                      <img src="http://emilcarlsson.se/assets/mikeross.png" alt="" />
-                      <p>What are you talking about? You do what they say or they shoot you.</p>
-                    </li>
-                    <li className="sent">
-                      <img src="http://emilcarlsson.se/assets/mikeross.png" alt="" />
-                      <p>What are you talking about? You do what they say or they shoot you.</p>
-                    </li>
-                    <li className="sent">
-                      <img src="http://emilcarlsson.se/assets/mikeross.png" alt="" />
-                      <p>What are you talking about? You do what they say or they shoot you.</p>
-                    </li>
-                    <li className="sent">
-                      <img src="http://emilcarlsson.se/assets/mikeross.png" alt="" />
-                      <p>What are you talking about? You do what they say or they shoot you.</p>
-                    </li>
-                    <li className="replies">
-                      <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-                      <p>Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do any one of a hundred and forty six other things.</p>
-                    </li>
-                    <li className="sent">
-                      <img src="http://emilcarlsson.se/assets/mikeross.png" alt="" />
-                      <p>What are you talking about? You do what they say or they shoot you.</p>
-                    </li>
-                    <li className="sent">
-                      <img src="http://emilcarlsson.se/assets/mikeross.png" alt="" />
-                      <p>What are you talking about? You do what they say or they shoot you.</p>
-                    </li>
-                    <li className="sent">
-                      <img src="http://emilcarlsson.se/assets/mikeross.png" alt="" />
-                      <p>What are you talking about? You do what they say or they shoot you.</p>
-                    </li>
-                    <li className="sent">
-                      <img src="http://emilcarlsson.se/assets/mikeross.png" alt="" />
-                      <p>What are you talking about? You do what they say or they shoot you.</p>
-                    </li>
-                  </ul>
+                  <ChatBox />
                 </div>
                 <div className="message-input">
                   <div className="wrap">
                   <input type="text" placeholder="Write your message..." />
-                  <button className="submit">Enter</button>
+                  <button className="submit">Send</button>
                   </div>
                 </div>
               </div>
