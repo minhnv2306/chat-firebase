@@ -1,7 +1,26 @@
 import React, { Component } from 'react';
+import '../../../src/css/description.css';
 
 export default class RoomInfo extends Component {
   render() {
-    return (<h1> This is RoomInfo </h1>);
+    return (
+      <div id="frame">
+        <div className="content">
+          <div className="contact-profile">
+            
+          </div>
+          <div className="description">
+            <div className="title">
+              <p>Description</p>
+              <div className="content">
+                <p>
+                  content
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 };
