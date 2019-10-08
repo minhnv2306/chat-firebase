@@ -12,11 +12,11 @@ export default class RoomInfo extends Component {
           <div className="description">
             <div className="title">
               <p>Description</p>
-              <div className="content">
-                <p>
-                  content
-                </p>
-              </div>
+            </div>
+            <div className="des-content">
+              <p>
+                content
+              </p>
             </div>
           </div>
         </div>
