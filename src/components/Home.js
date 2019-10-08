@@ -1,9 +1,9 @@
 import React from 'react';
 import { Row, Col } from 'antd';
 import 'antd/dist/antd.css';
+import '../../src/css/layout.css';
 import setFirebaseConfig from './../helpers/firebase';
 import Header from './Layout/Header';
-import Footer from './Layout/Footer';
 import Sidebar from './Layout/Sidebar';
 import RoomInfo from './Layout/RoomInfo';
 
@@ -43,7 +43,7 @@ export default class Example extends React.Component {
 
   render() {
     return (
-      <div>
+      <div className="div-block">
         <Row>
           <Col span={4}>
             <Sidebar />
@@ -143,11 +143,6 @@ export default class Example extends React.Component {
           </Col>
           <Col span={4}>
             <RoomInfo />
-          </Col>
-        </Row>
-        <Row>
-          <Col span={24}>
-            <Footer />
           </Col>
         </Row>
       </div>
