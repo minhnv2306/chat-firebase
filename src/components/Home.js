@@ -10,26 +10,50 @@ import ChatBox from './Layout/ChatBox';
 import * as roomService from './../services/room';
 
 var db;
+var _ = require('underscore');
 
 export default class Example extends React.Component {
+  state = {
+    user: {},
+    messages: [],
+    members: []
+  };
+
   componentDidMount() {
     const _this = this;
     var firebase = setFirebaseConfig();
     db = firebase.firestore();
 
-    db.collection('rooms').where('id', '==', 1).onSnapshot(function(snapshot) {
-        snapshot.docChanges().forEach(function(change) {
-          if (change.type === "added") {
-            console.log("New city: ", change.doc.data());
-          }
-          if (change.type === "modified") {
-            console.log("Modified city: ", change.doc.data());
-          }
-          if (change.type === "removed") {
-            console.log("Removed city: ", change.doc.data());
-          }
+    var first = db
+      .collection('rooms')
+      .where('id', '==', 1)
+      .get()
+      .then(function(snapshot) {
+        snapshot.forEach(function(doc) {
+          var messages = doc.data().messages;
+
+          messages.map(async m => {
+            var user = await db
+              .collection('users')
+              .where('id', '==', m.user)
+              .get();
+
+            if (
+              _.findWhere(_this.state.members, {
+                email: user.docs[0].data().email
+              }) == undefined
+            ) {
+              _this.setState({
+                members: [..._this.state.members, user.docs[0].data()]
+              });
+            }
+          });
+
+          _this.setState({
+            messages: messages
+          });
         });
-    });
+      });
 
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
@@ -51,25 +75,45 @@ export default class Example extends React.Component {
           }
         });
 
-        db.collection('users').where('id', '==', user.uid).get().then(function(snapshot) {
-          if (snapshot.size == 0) {
-            db.collection('users').add({
-              id: user.uid,
-              name: user.displayName,
-              email: user.email
-            });
-          }
-        })
-
+        db.collection('users')
+          .where('id', '==', user.uid)
+          .get()
+          .then(function(snapshot) {
+            if (snapshot.size == 0) {
+              db.collection('users').add({
+                id: user.uid,
+                name: user.displayName,
+                email: user.email,
+                avatar: user.photoURL
+              });
+            }
+          });
       } else {
         // User is signed out.
         window.location.href = '/login';
       }
     });
+
+    db.collection('rooms')
+      .where('id', '==', 1)
+      .onSnapshot(function(snapshot) {
+        snapshot.docChanges().forEach(function(change) {
+          if (change.type === 'added') {
+            console.log('New city: ', change.doc.data());
+          }
+          if (change.type === 'modified') {
+            console.log('Modified city: ', change.doc.data());
+            var data = change.doc.data();
+            _this.setState({
+              messages: data.messages
+            });
+          }
+          if (change.type === 'removed') {
+            console.log('Removed city: ', change.doc.data());
+          }
+        });
+      });
   }
-  state = {
-    user: {},
-  };
 
   sendMessage = () => {
     const content = document.getElementById('js-msg-content').value;
@@ -78,10 +122,11 @@ export default class Example extends React.Component {
     var msgData = {
       user: userId,
       content: content,
-      is_notification: false,
+      is_notification: false
     };
 
     roomService.sendMessage(db, 1, msgData);
+    document.getElementById('js-msg-content').value = '';
   };
 
   render() {
@@ -89,27 +134,40 @@ export default class Example extends React.Component {
       <div className="div-block">
         <Row>
           <Col span={4}>
-            <Sidebar user={this.state.user}/>
+            <Sidebar user={this.state.user} />
           </Col>
           <Col span={16}>
             <div id="frame">
               <div className="content">
                 <div className="contact-profile">
-                  <img src="https://www.w3schools.com/bootstrap/img_avatar3.png" alt="" />
+                  <img
+                    src="https://www.w3schools.com/bootstrap/img_avatar3.png"
+                    alt=""
+                  />
                   <p>Harvey Specter</p>
                   <div className="social-media">
                     <i className="fa fa-facebook" aria-hidden="true"></i>
                     <i className="fa fa-twitter" aria-hidden="true"></i>
-                     <i className="fa fa-instagram" aria-hidden="true"></i>
+                    <i className="fa fa-instagram" aria-hidden="true"></i>
                   </div>
                 </div>
                 <div className="messages">
-                  <ChatBox />
+                  <ChatBox
+                    messages={this.state.messages}
+                    members={this.state.members}
+                    uid={this.state.user.uid}
+                  />
                 </div>
                 <div className="message-input">
                   <div className="wrap">
-                  <input type="text" placeholder="Write your message..." id="js-msg-content" />
-                  <button className="submit" onClick={this.sendMessage}>Send</button>
+                    <input
+                      type="text"
+                      placeholder="Write your message..."
+                      id="js-msg-content"
+                    />
+                    <button className="submit" onClick={this.sendMessage}>
+                      Send
+                    </button>
                   </div>
                 </div>
               </div>
@@ -122,4 +180,4 @@ export default class Example extends React.Component {
       </div>
     );
   }
-};
+}

@@ -1,30 +1,34 @@
 import React, { Component } from 'react';
 
+const _ = require('underscore');
+
 export default class ChatBox extends Component {
   render() {
-    return (
-      <ul>
-        <li className="sent">
-          <img src="http://emilcarlsson.se/assets/mikeross.png" alt="" />
-          <p>How the hell am I supposed to get a jury to believe you when I am not even sure that I do?!</p>
-        </li>
-        <li className="replies">
-          <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-          <p>When you're backed against the wall, break the god damn thing down.</p>
-        </li>
-        <li className="replies">
-          <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-          <p>Excuses don't win championships.</p>
-        </li>
-        <li className="sent">
-          <img src="http://emilcarlsson.se/assets/mikeross.png" alt="" />
-          <p>Oh yeah, did Michael Jordan tell you that?</p>
-        </li>
-        <li className="replies">
-          <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-          <p>No, I told him that.</p>
-        </li>
-      </ul>
-    )
+    var messagesHTML = [];
+    var members = this.props.members;
+
+    this.props.messages.map(m => {
+      var userInfo = _.findWhere(this.props.members, { id: m.user });
+
+      if (userInfo) {
+        if (userInfo.id != this.props.uid) {
+          messagesHTML.push(
+            <li className="sent">
+              <img src={userInfo.avatar} alt="" />
+              <p>{m.content}</p>
+            </li>
+          );
+        } else {
+          messagesHTML.push(
+            <li className="replies">
+              <img src={userInfo.avatar} alt="" />
+              <p>{m.content}</p>
+            </li>
+          );
+        }
+      }
+    });
+
+    return <ul>{messagesHTML}</ul>;
   }
-};
+}
