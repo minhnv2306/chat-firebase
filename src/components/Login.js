@@ -57,7 +57,7 @@ export default class Login extends Component {
     return (
       <div>
         <h1 className="header"> Sky'sssss </h1>
-        <div className="content">
+        <div className="login__content">
           <h2> Login to sky'ss app </h2>
           <div id="firebaseui-auth-container"></div>
           <div id="loader">Loading...</div>
