@@ -7,12 +7,29 @@ import Header from './Layout/Header';
 import Sidebar from './Layout/Sidebar';
 import RoomInfo from './Layout/RoomInfo';
 import ChatBox from './Layout/ChatBox';
+import * as roomService from './../services/room';
+
+var db;
 
 export default class Example extends React.Component {
   componentDidMount() {
     const _this = this;
     var firebase = setFirebaseConfig();
-    var db = firebase.firestore();
+    db = firebase.firestore();
+
+    db.collection('rooms').where('id', '==', 1).onSnapshot(function(snapshot) {
+        snapshot.docChanges().forEach(function(change) {
+          if (change.type === "added") {
+            console.log("New city: ", change.doc.data());
+          }
+          if (change.type === "modified") {
+            console.log("Modified city: ", change.doc.data());
+          }
+          if (change.type === "removed") {
+            console.log("Removed city: ", change.doc.data());
+          }
+        });
+    });
 
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
@@ -29,7 +46,8 @@ export default class Example extends React.Component {
           user: {
             name: user.displayName,
             email: user.email,
-            photoURL: user.photoURL
+            photoURL: user.photoURL,
+            uid: user.uid
           }
         });
 
@@ -51,6 +69,19 @@ export default class Example extends React.Component {
   }
   state = {
     user: {},
+  };
+
+  sendMessage = () => {
+    const content = document.getElementById('js-msg-content').value;
+    const userId = this.state.user.uid;
+
+    var msgData = {
+      user: userId,
+      content: content,
+      is_notification: false,
+    };
+
+    roomService.sendMessage(db, 1, msgData);
   };
 
   render() {
@@ -77,8 +108,8 @@ export default class Example extends React.Component {
                 </div>
                 <div className="message-input">
                   <div className="wrap">
-                  <input type="text" placeholder="Write your message..." />
-                  <button className="submit">Send</button>
+                  <input type="text" placeholder="Write your message..." id="js-msg-content" />
+                  <button className="submit" onClick={this.sendMessage}>Send</button>
                   </div>
                 </div>
               </div>
