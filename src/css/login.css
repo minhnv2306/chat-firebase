@@ -1,15 +1,11 @@
-body {
-	background-image: url('https://identity.flickr.com/img/033120190455-by-Henry.5365e520.jpg')
-}
-
-.content {
-	padding-top: 50px;
-	text-align: center !important;
+.login__content {
+  padding-top: 50px;
+  text-align: center !important;
 }
 
 .header {
-	background-color: #212124;
-	color: white;
+  background-color: #212124;
+  color: white;
   height: 55px;
   padding-left: 10%;
   padding-top: 5px;
