@@ -16,7 +16,8 @@ export default class Example extends React.Component {
   state = {
     user: {},
     messages: [],
-    members: []
+    members: [],
+    roomInfo: {}
   };
 
   componentDidMount() {
@@ -31,8 +32,9 @@ export default class Example extends React.Component {
       .then(function(snapshot) {
         snapshot.forEach(function(doc) {
           var messages = doc.data().messages;
+          var members = doc.data().members;
 
-          messages.map(async m => {
+          members.map(async m => {
             var user = await db
               .collection('users')
               .where('id', '==', m.user)
@@ -40,7 +42,7 @@ export default class Example extends React.Component {
 
             if (
               _.findWhere(_this.state.members, {
-                email: user.docs[0].data().email
+                id: user.docs[0].data().id
               }) == undefined
             ) {
               _this.setState({
@@ -50,7 +52,11 @@ export default class Example extends React.Component {
           });
 
           _this.setState({
-            messages: messages
+            messages: messages,
+            roomInfo: {
+              name: doc.data().name,
+              avatar: doc.data().avatar
+            }
           });
         });
       });
@@ -98,35 +104,30 @@ export default class Example extends React.Component {
       .where('id', '==', 1)
       .onSnapshot(function(snapshot) {
         snapshot.docChanges().forEach(function(change) {
-          if (change.type === 'added') {
-            console.log('New city: ', change.doc.data());
-          }
-          if (change.type === 'modified') {
-            console.log('Modified city: ', change.doc.data());
-            var data = change.doc.data();
-            _this.setState({
-              messages: data.messages
-            });
-          }
-          if (change.type === 'removed') {
-            console.log('Removed city: ', change.doc.data());
-          }
+          var data = change.doc.data();
+
+          _this.setState({
+            messages: data.messages
+          });
         });
       });
   }
 
-  sendMessage = () => {
+  sendMessage = e => {
     const content = document.getElementById('js-msg-content').value;
-    const userId = this.state.user.uid;
-
-    var msgData = {
-      user: userId,
-      content: content,
-      is_notification: false
-    };
-
-    roomService.sendMessage(db, 1, msgData);
-    document.getElementById('js-msg-content').value = '';
+    if (
+      ((e.type == 'keyup' && e.key === 'Enter') || e.type == 'click') &&
+      content
+    ) {
+      const userId = this.state.user.uid;
+      var msgData = {
+        user: userId,
+        content: content,
+        is_notification: false
+      };
+      roomService.sendMessage(db, 1, msgData);
+      document.getElementById('js-msg-content').value = '';
+    }
   };
 
   render() {
@@ -140,11 +141,8 @@ export default class Example extends React.Component {
             <div id="frame">
               <div className="content">
                 <div className="contact-profile">
-                  <img
-                    src="https://www.w3schools.com/bootstrap/img_avatar3.png"
-                    alt=""
-                  />
-                  <p>Harvey Specter</p>
+                  <img src={this.state.roomInfo.avatar} alt="" />
+                  <p>{this.state.roomInfo.name}</p>
                   <div className="social-media">
                     <i className="fa fa-facebook" aria-hidden="true"></i>
                     <i className="fa fa-twitter" aria-hidden="true"></i>
@@ -164,6 +162,7 @@ export default class Example extends React.Component {
                       type="text"
                       placeholder="Write your message..."
                       id="js-msg-content"
+                      onKeyUp={this.sendMessage}
                     />
                     <button className="submit" onClick={this.sendMessage}>
                       Send
