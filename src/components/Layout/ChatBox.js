@@ -23,19 +23,37 @@ export default class ChatBox extends Component {
 
       if (userInfo) {
         if (userInfo.id != this.props.uid) {
-          messagesHTML.push(
-            <li className="sent" ref={index} key={index}>
-              <img src={userInfo.avatar} alt="" />
-              <p>{m.content}</p>
-            </li>
-          );
+          if (m.is_file) {
+            messagesHTML.push(
+              <li className="sent" ref={index} key={index}>
+                <img src={userInfo.avatar} alt="" />
+                <img src={m.content} />
+              </li>
+            );
+          } else {
+            messagesHTML.push(
+              <li className="sent" ref={index} key={index}>
+                <img src={userInfo.avatar} alt="" />
+                <p>{m.content}</p>
+              </li>
+            );
+          }
         } else {
-          messagesHTML.push(
-            <li className="replies" ref={index} key={index}>
-              <img src={userInfo.avatar} alt="" />
-              <p>{m.content}</p>
-            </li>
-          );
+          if (m.is_file) {
+            messagesHTML.push(
+              <li className="replies" ref={index} key={index}>
+                <img src={userInfo.avatar} alt="" />
+                <img className="image-msg img-rounded" src={m.content} />
+              </li>
+            );
+          } else {
+            messagesHTML.push(
+              <li className="replies" ref={index} key={index}>
+                <img src={userInfo.avatar} alt="" />
+                <p>{m.content}</p>
+              </li>
+            );
+          }
         }
       }
     });

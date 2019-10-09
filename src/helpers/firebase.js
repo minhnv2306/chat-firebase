@@ -5,6 +5,7 @@ import * as firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/database';
 import 'firebase/firestore';
+import 'firebase/storage';
 
 export default function setFirebaseConfig() {
   // Your web app's Firebase configuration

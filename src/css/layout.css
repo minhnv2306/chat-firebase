@@ -694,3 +694,19 @@ html {
 #frame .content .message-input .wrap button:focus {
   outline: none;
 }
+
+.image-msg {
+  width: 150px !important;
+  border-radius: 0% !important;
+}
+
+.file {
+  display: none;
+}
+
+.upload-image {
+  width: 40px !important;
+  border-radius: 50%;
+  margin-left: 5px;
+  float: left !important;
+}
