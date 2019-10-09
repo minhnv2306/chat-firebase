@@ -6,21 +6,17 @@ export default class RoomInfo extends Component {
     return (
       <div id="frame">
         <div className="content">
-          <div className="contact-profile">
-            
-          </div>
+          <div className="contact-profile"></div>
           <div className="description">
             <div className="title">
               <p>Description</p>
             </div>
             <div className="des-content">
-              <p>
-                content
-              </p>
+              <p>content</p>
             </div>
           </div>
         </div>
       </div>
     );
   }
-};
+}
