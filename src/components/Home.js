@@ -42,6 +42,7 @@ export default class Example extends React.Component {
               .get();
 
             if (
+              user.docs[0] &&
               _.findWhere(_this.state.members, {
                 id: user.docs[0].data().id
               }) == undefined
@@ -214,7 +215,7 @@ export default class Example extends React.Component {
       <div className="div-block">
         <Row>
           <Col span={4}>
-            <Sidebar user={this.state.user} />
+            <Sidebar user={this.state.user} db={db} />
           </Col>
           <Col span={16}>
             <div id="frame">
@@ -243,7 +244,12 @@ export default class Example extends React.Component {
                       id="js-msg-content"
                       onKeyUp={this.sendMessage}
                     />
-                    <input type="file" onChange={this.uploadFile} id="file" class="file"/>
+                    <input
+                      type="file"
+                      onChange={this.uploadFile}
+                      id="file"
+                      className="file"
+                    />
                     <button className="upload-image" onClick={this.uploadImage}>
                       <Icon type="file-image" />
                     </button>
