@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col } from 'antd';
+import { Row, Col, Icon } from 'antd';
 import 'antd/dist/antd.css';
 import '../../src/css/layout.css';
 import setFirebaseConfig from './../helpers/firebase';
@@ -10,6 +10,7 @@ import ChatBox from './Layout/ChatBox';
 import * as roomService from './../services/room';
 
 var db;
+var firebase;
 var _ = require('underscore');
 
 export default class Example extends React.Component {
@@ -22,7 +23,7 @@ export default class Example extends React.Component {
 
   componentDidMount() {
     const _this = this;
-    var firebase = setFirebaseConfig();
+    firebase = setFirebaseConfig();
     db = firebase.firestore();
 
     var first = db
@@ -130,6 +131,84 @@ export default class Example extends React.Component {
     }
   };
 
+  uploadImage = () => {
+    var file = document.getElementById('file');
+
+    file.click();
+  };
+
+  uploadFile = e => {
+    var _this = this;
+    var storage = firebase.storage();
+
+    // Create a storage reference from our storage service
+    var storageRef = storage.ref();
+    // Create a child reference
+    var fileObj = e.target.files[0];
+    var imagesRef = storageRef.child('images/' + fileObj.name);
+
+    // Create the file metadata
+    var metadata = {
+      contentType: 'image/jpeg'
+    };
+
+    // Upload file and metadata to the object 'images/mountains.jpg'
+    var uploadTask = storageRef
+      .child('images/' + fileObj.name)
+      .put(fileObj, metadata);
+
+    // Listen for state changes, errors, and completion of the upload.
+    uploadTask.on(
+      firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
+      function(snapshot) {
+        // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+        var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log('Upload is ' + progress + '% done');
+        switch (snapshot.state) {
+          case firebase.storage.TaskState.PAUSED: // or 'paused'
+            console.log('Upload is paused');
+            break;
+          case firebase.storage.TaskState.RUNNING: // or 'running'
+            console.log('Upload is running');
+            break;
+        }
+      },
+      function(error) {
+        // A full list of error codes is available at
+        // https://firebase.google.com/docs/storage/web/handle-errors
+        switch (error.code) {
+          case 'storage/unauthorized':
+            // User doesn't have permission to access the object
+            break;
+
+          case 'storage/canceled':
+            // User canceled the upload
+            break;
+
+          case 'storage/unknown':
+            // Unknown error occurred, inspect error.serverResponse
+            break;
+        }
+      },
+      function() {
+        // Upload completed successfully, now we can get the download URL
+        uploadTask.snapshot.ref.getDownloadURL().then(function(downloadURL) {
+          console.log('File available at', downloadURL);
+
+          const userId = _this.state.user.uid;
+          var msgData = {
+            user: userId,
+            content: downloadURL,
+            is_notification: false,
+            is_file: true
+          };
+
+          roomService.sendMessage(db, 1, msgData);
+        });
+      }
+    );
+  };
+
   render() {
     return (
       <div className="div-block">
@@ -164,6 +243,10 @@ export default class Example extends React.Component {
                       id="js-msg-content"
                       onKeyUp={this.sendMessage}
                     />
+                    <input type="file" onChange={this.uploadFile} id="file" class="file"/>
+                    <button className="upload-image" onClick={this.uploadImage}>
+                      <Icon type="file-image" />
+                    </button>
                     <button className="submit" onClick={this.sendMessage}>
                       Send
                     </button>
