@@ -63,20 +63,23 @@ export default class Sidebar extends Component {
   };
 
   search = value => {
-    let a = this.props.db
+    var _this = this;
+    this.props.db
       .collection('users')
       .orderBy('email')
       .startAt(value)
       .endAt(value)
       .get()
       .then(querySnapshot => {
-        let request = [];
+        let result = [];
         querySnapshot.forEach(function(doc) {
           if (doc) {
-            request.push(doc.data());
+            if (doc.data().id != _this.props.user.uid) {
+              result.push(doc.data());
+            }
           }
         });
-        this.setState({ requests: request });
+        this.setState({ requests: result });
       });
   };
 
@@ -89,13 +92,17 @@ export default class Sidebar extends Component {
       .then(function(querySnapshot) {
         querySnapshot.forEach(function(doc) {
           var data = doc.data();
-
           _this.props.db
             .collection('users')
             .doc(doc.id)
             .update({ requests: data.requests.concat(_this.props.user.uid) });
+          message.success('Gửi lời mời kết bạn thành công', 10);
         });
       });
+
+    this.setState(prevState => ({
+      requests: prevState.requests.filter(item => item.id != id)
+    }));
   };
 
   handleAcceptRequest = id => {
@@ -158,6 +165,7 @@ export default class Sidebar extends Component {
     this.setState(prevState => ({
       invites: prevState.invites.filter(item => item.id != id)
     }));
+    message.success('Chấp nhận lời mời kết bạn thành công', 10);
   };
 
   render() {
@@ -235,7 +243,7 @@ export default class Sidebar extends Component {
               <span>Add contact</span>
             </button>
             <button id="settings">
-              <i className="fa fa-cog fa-fw" aria-hidden="true" />{" "}
+              <i className="fa fa-cog fa-fw" aria-hidden="true" />{' '}
               <span>Settings</span>
             </button>
           </div>
@@ -266,9 +274,28 @@ export default class Sidebar extends Component {
                       />
 
                       <Button.Group className="btn-accept">
-                        <Button onClick={() => this.hanleSendRequest(item.id)}>
-                          Gửi lời mời kết bạn
-                        </Button>
+                        {item.requests.includes(this.props.user.uid) ? (
+                          <Button className="friends">
+                            Đã gửi lời mời kết bạn
+                          </Button>
+                        ) : (
+                          ''
+                        )}
+                        {item.friends.includes(this.props.user.uid) ? (
+                          <Button className="friends"> Đã là bạn bè</Button>
+                        ) : (
+                          ''
+                        )}
+                        {!item.requests.includes(this.props.user.uid) &&
+                        !item.friends.includes(this.props.user.uid) ? (
+                          <Button
+                            onClick={() => this.hanleSendRequest(item.id)}
+                          >
+                            Gửi lời mời kết bạn
+                          </Button>
+                        ) : (
+                          ''
+                        )}
                       </Button.Group>
                     </List.Item>
                   )}
