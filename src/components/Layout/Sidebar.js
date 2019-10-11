@@ -230,8 +230,8 @@ export default class Sidebar extends Component {
             <ul>{roomsHTML}</ul>
           </div>
           <div id="bottom-bar">
-            <button id="addcontact">
-              <i className="fa fa-user-plus fa-fw" aria-hidden="true" />{" "}
+            <button id="addcontact" onClick={this.showModal}>
+              <i className="fa fa-user-plus fa-fw" aria-hidden="true" />{' '}
               <span>Add contact</span>
             </button>
             <button id="settings">
