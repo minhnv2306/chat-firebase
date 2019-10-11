@@ -3,7 +3,6 @@ import { Row, Col, Icon } from 'antd';
 import 'antd/dist/antd.css';
 import '../../src/css/layout.css';
 import setFirebaseConfig from './../helpers/firebase';
-import Header from './Layout/Header';
 import Sidebar from './Layout/Sidebar';
 import RoomInfo from './Layout/RoomInfo';
 import ChatBox from './Layout/ChatBox';
@@ -18,7 +17,8 @@ export default class Example extends React.Component {
     user: {},
     messages: [],
     members: [],
-    roomInfo: {}
+    roomInfo: {},
+    rooms: []
   };
 
   componentDidMount() {
@@ -95,6 +95,22 @@ export default class Example extends React.Component {
                 avatar: user.photoURL
               });
             }
+          });
+
+        db.collection('rooms').where('check_members', 'array-contains', user.uid)
+          .get()
+          .then(function(querySnapshot) {
+            querySnapshot.forEach(function(doc) {
+              _this.setState({
+                rooms: [..._this.state.rooms, doc.data()]
+              });
+            });
+          })
+          .catch(function(error) {
+            _this.setState({
+              rooms: []
+            });
+            console.log("Error getting documents: ", error);
           });
       } else {
         // User is signed out.
@@ -215,7 +231,7 @@ export default class Example extends React.Component {
       <div className="div-block">
         <Row>
           <Col span={4}>
-            <Sidebar user={this.state.user} db={db} />
+            <Sidebar user={this.state.user} db={db} rooms={this.state.rooms}/>
           </Col>
           <Col span={16}>
             <div id="frame">

@@ -161,6 +161,31 @@ export default class Sidebar extends Component {
   };
 
   render() {
+    var roomsHTML = [];
+    var rooms = this.props.rooms;
+
+    if (typeof rooms !== 'undefined' && rooms.length > 0) {
+      this.props.rooms.map((room, i) => {
+        room.content = '';
+        if (typeof room.messages !== 'undefined' && room.messages.length > 0) {
+          room.content = room.messages[room.messages.length - 1].content;
+        }
+
+        roomsHTML.push(
+          <li key={i} className="contact active">
+            <div className="wrap">
+              <span className="contact-status online" />
+              <img src={room.avatar} alt={room.name} />
+              <div className="meta">
+                <p className="name">{room.name}</p>
+                <p className="preview">{room.content}</p>
+              </div>
+            </div>
+          </li>
+        );
+      });
+    }
+
     return (
       <div id="frame">
         <div id="sidepanel">
@@ -176,20 +201,20 @@ export default class Sidebar extends Component {
               <i
                 className="fa fa-chevron-down expand-button"
                 aria-hidden="true"
-              ></i>
+              />
               <div id="status-options">
                 <ul>
                   <li id="status-online" className="active">
-                    <span className="status-circle"></span> <p>Online</p>
+                    <span className="status-circle" /> <p>Online</p>
                   </li>
                   <li id="status-away">
-                    <span className="status-circle"></span> <p>Away</p>
+                    <span className="status-circle" /> <p>Away</p>
                   </li>
                   <li id="status-busy">
-                    <span className="status-circle"></span> <p>Busy</p>
+                    <span className="status-circle" /> <p>Busy</p>
                   </li>
                   <li id="status-offline">
-                    <span className="status-circle"></span> <p>Offline</p>
+                    <span className="status-circle" /> <p>Offline</p>
                   </li>
                 </ul>
               </div>
@@ -197,97 +222,20 @@ export default class Sidebar extends Component {
           </div>
           <div id="search">
             <label htmlFor="">
-              <i className="fa fa-search" aria-hidden="true"></i>
+              <i className="fa fa-search" aria-hidden="true" />
             </label>
             <input type="text" placeholder="Search contacts..." />
           </div>
           <div id="contacts">
-            <ul>
-              <li className="contact">
-                <div className="wrap">
-                  <span className="contact-status online"></span>
-                  <img
-                    src="https://www.w3schools.com/bootstrap/img_avatar3.png"
-                    alt=""
-                  />
-                  <div className="meta">
-                    <p className="name">Louis Litt</p>
-                    <p className="preview">You just got LITT up, Mike.</p>
-                  </div>
-                </div>
-              </li>
-              <li className="contact active">
-                <div className="wrap">
-                  <span className="contact-status busy"></span>
-                  <img
-                    src="https://www.w3schools.com/bootstrap/img_avatar3.png"
-                    alt=""
-                  />
-                  <div className="meta">
-                    <p className="name">Harvey Specter</p>
-                    <p className="preview">
-                      Wrong. You take the gun, or you pull out a bigger one. Or,
-                      you call their bluff. Or, you do any one of a hundred and
-                      forty six other things.
-                    </p>
-                  </div>
-                </div>
-              </li>
-              <li className="contact">
-                <div className="wrap">
-                  <span className="contact-status away"></span>
-                  <img
-                    src="https://www.w3schools.com/bootstrap/img_avatar3.png"
-                    alt=""
-                  />
-                  <div className="meta">
-                    <p className="name">Rachel Zane</p>
-                    <p className="preview">
-                      I was thinking that we could have chicken tonight, sounds
-                      good?
-                    </p>
-                  </div>
-                </div>
-              </li>
-              <li className="contact">
-                <div className="wrap">
-                  <span className="contact-status online"></span>
-                  <img
-                    src="https://www.w3schools.com/bootstrap/img_avatar3.png"
-                    alt=""
-                  />
-                  <div className="meta">
-                    <p className="name">Donna Paulsen</p>
-                    <p className="preview">
-                      Mike, I know everything! I'm Donna..
-                    </p>
-                  </div>
-                </div>
-              </li>
-              <li className="contact">
-                <div className="wrap">
-                  <span className="contact-status busy"></span>
-                  <img
-                    src="https://www.w3schools.com/bootstrap/img_avatar3.png"
-                    alt=""
-                  />
-                  <div className="meta">
-                    <p className="name">Jessica Pearson</p>
-                    <p className="preview">
-                      Have you finished the draft on the Hinsenburg deal?
-                    </p>
-                  </div>
-                </div>
-              </li>
-            </ul>
+            <ul>{roomsHTML}</ul>
           </div>
           <div id="bottom-bar">
-            <button id="addcontact" onClick={this.showModal}>
-              <i className="fa fa-user-plus fa-fw" aria-hidden="true"></i>{' '}
+            <button id="addcontact">
+              <i className="fa fa-user-plus fa-fw" aria-hidden="true" />{" "}
               <span>Add contact</span>
             </button>
             <button id="settings">
-              <i className="fa fa-cog fa-fw" aria-hidden="true"></i>{' '}
+              <i className="fa fa-cog fa-fw" aria-hidden="true" />{" "}
               <span>Settings</span>
             </button>
           </div>
