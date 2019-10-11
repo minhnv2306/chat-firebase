@@ -13,7 +13,8 @@ export default class Sidebar extends Component {
     this.state = {
       visible: false,
       requests: [],
-      invites: []
+      invites: [],
+      selectedRoomId: '',
     };
   }
 
@@ -35,7 +36,10 @@ export default class Sidebar extends Component {
     });
   };
 
-  componentDidMount() {}
+  componentDidMount() {
+
+  }
+
   callback = key => {
     this.setState({ invites: [] });
     const _this = this;
@@ -168,11 +172,15 @@ export default class Sidebar extends Component {
     message.success('Chấp nhận lời mời kết bạn thành công', 10);
   };
 
+  updateSelectedRoom = (roomId) => {
+
+  };
+
   render() {
     var roomsHTML = [];
     var rooms = this.props.rooms;
 
-    if (typeof rooms !== 'undefined' && rooms.length > 0) {
+    if (rooms && rooms.length > 0) {
       this.props.rooms.map((room, i) => {
         room.content = '';
         if (typeof room.messages !== 'undefined' && room.messages.length > 0) {
@@ -180,7 +188,7 @@ export default class Sidebar extends Component {
         }
 
         roomsHTML.push(
-          <li key={i} className="contact active">
+          <li key={i} className={this.props.roomId == room.key ? 'contact active' : 'contact'} onClick={() => this.props.changeCurrenRoom(room.key)}>
             <div className="wrap">
               <span className="contact-status online" />
               <img src={room.avatar} alt={room.name} />

@@ -18,7 +18,8 @@ export default class Example extends React.Component {
     messages: [],
     members: [],
     roomInfo: {},
-    rooms: []
+    rooms: [],
+    currentRoomId: 'ToJLJz81Z2pFc5MSGDRz',
   };
 
   componentDidMount() {
@@ -26,42 +27,7 @@ export default class Example extends React.Component {
     firebase = setFirebaseConfig();
     db = firebase.firestore();
 
-    var first = db
-      .collection('rooms')
-      .where('id', '==', 1)
-      .get()
-      .then(function(snapshot) {
-        snapshot.forEach(function(doc) {
-          var messages = doc.data().messages;
-          var members = doc.data().members;
-
-          members.map(async m => {
-            var user = await db
-              .collection('users')
-              .where('id', '==', m.user)
-              .get();
-
-            if (
-              user.docs[0] &&
-              _.findWhere(_this.state.members, {
-                id: user.docs[0].data().id
-              }) == undefined
-            ) {
-              _this.setState({
-                members: [..._this.state.members, user.docs[0].data()]
-              });
-            }
-          });
-
-          _this.setState({
-            messages: messages,
-            roomInfo: {
-              name: doc.data().name,
-              avatar: doc.data().avatar
-            }
-          });
-        });
-      });
+    this.getDataRoom(this.state.currentRoomId);
 
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
@@ -101,8 +67,9 @@ export default class Example extends React.Component {
           .get()
           .then(function(querySnapshot) {
             querySnapshot.forEach(function(doc) {
+              var data = Object.assign(doc.data(), {'key': doc.id});
               _this.setState({
-                rooms: [..._this.state.rooms, doc.data()]
+                rooms: [..._this.state.rooms, data],
               });
             });
           })
@@ -110,7 +77,6 @@ export default class Example extends React.Component {
             _this.setState({
               rooms: []
             });
-            console.log("Error getting documents: ", error);
           });
       } else {
         // User is signed out.
@@ -143,7 +109,7 @@ export default class Example extends React.Component {
         content: content,
         is_notification: false
       };
-      roomService.sendMessage(db, 1, msgData);
+      roomService.sendMessage(db, this.state.currentRoomId, msgData);
       document.getElementById('js-msg-content').value = '';
     }
   };
@@ -180,13 +146,10 @@ export default class Example extends React.Component {
       function(snapshot) {
         // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
         var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log('Upload is ' + progress + '% done');
         switch (snapshot.state) {
           case firebase.storage.TaskState.PAUSED: // or 'paused'
-            console.log('Upload is paused');
             break;
           case firebase.storage.TaskState.RUNNING: // or 'running'
-            console.log('Upload is running');
             break;
         }
       },
@@ -210,7 +173,6 @@ export default class Example extends React.Component {
       function() {
         // Upload completed successfully, now we can get the download URL
         uploadTask.snapshot.ref.getDownloadURL().then(function(downloadURL) {
-          console.log('File available at', downloadURL);
 
           const userId = _this.state.user.uid;
           var msgData = {
@@ -226,12 +188,60 @@ export default class Example extends React.Component {
     );
   };
 
+  getDataRoom = (currentRoomId) => {
+    const _this = this;
+
+    var first = db
+      .collection('rooms')
+      .doc(currentRoomId)
+      .get()
+      .then(function(doc) {
+        if (doc.exists) {
+          var messages = doc.data().messages;
+          var members = doc.data().members;
+
+          members.map(async m => {
+            var user = await db
+              .collection('users')
+              .where('id', '==', m.user)
+              .get();
+
+            if (
+              user.docs[0] &&
+              _.findWhere(_this.state.members, {
+                id: user.docs[0].data().id
+              }) == undefined
+            ) {
+              _this.setState({
+                members: [..._this.state.members, user.docs[0].data()]
+              });
+            }
+          });
+
+          _this.setState({
+            messages: messages,
+            roomInfo: {
+              name: doc.data().name,
+              avatar: doc.data().avatar,
+              key: doc.id
+            },
+            currentRoomId: doc.id,
+          });
+        }
+      });
+  }
+
+  changeCurrenRoom = (currentRoomId) => {
+    this.setState({currentRoomId});
+    this.getDataRoom(currentRoomId);
+  }
+
   render() {
     return (
       <div className="div-block">
         <Row>
           <Col span={4}>
-            <Sidebar user={this.state.user} db={db} rooms={this.state.rooms}/>
+            <Sidebar user={this.state.user} db={db} rooms={this.state.rooms} roomId={this.state.currentRoomId} changeCurrenRoom={this.changeCurrenRoom} />
           </Col>
           <Col span={16}>
             <div id="frame">
@@ -247,6 +257,7 @@ export default class Example extends React.Component {
                 </div>
                 <div className="messages">
                   <ChatBox
+                    roomId={this.state.roomInfo}
                     messages={this.state.messages}
                     members={this.state.members}
                     uid={this.state.user.uid}
