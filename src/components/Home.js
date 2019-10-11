@@ -97,7 +97,8 @@ export default class Example extends React.Component {
             }
           });
 
-        db.collection('rooms').where('check_members', 'array-contains', user.uid)
+        db.collection('rooms')
+          .where('check_members', 'array-contains', user.uid)
           .get()
           .then(function(querySnapshot) {
             querySnapshot.forEach(function(doc) {
@@ -110,7 +111,7 @@ export default class Example extends React.Component {
             _this.setState({
               rooms: []
             });
-            console.log("Error getting documents: ", error);
+            console.log('Error getting documents: ', error);
           });
       } else {
         // User is signed out.
@@ -231,9 +232,9 @@ export default class Example extends React.Component {
       <div className="div-block">
         <Row>
           <Col span={4}>
-            <Sidebar user={this.state.user} db={db} rooms={this.state.rooms}/>
+            <Sidebar user={this.state.user} db={db} rooms={this.state.rooms} />
           </Col>
-          <Col span={16}>
+          <Col span={15}>
             <div id="frame">
               <div className="content">
                 <div className="contact-profile">
@@ -277,8 +278,11 @@ export default class Example extends React.Component {
               </div>
             </div>
           </Col>
-          <Col span={4}>
-            <RoomInfo />
+          <Col span={5}>
+            <RoomInfo
+              members={this.state.members}
+              roomInfo={this.state.roomInfo}
+            />
           </Col>
         </Row>
       </div>

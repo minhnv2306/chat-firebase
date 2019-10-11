@@ -784,3 +784,25 @@ html {
   background-color: #2190ff;
   color: white;
 }
+
+.des-content > .ant-avatar-image {
+  position: absolute;
+  margin-left: 20%;
+}
+
+.des-content > .ant-avatar-image:nth-child(2) {
+  margin-left: 140px;
+}
+
+.des-content > .ant-avatar-image:nth-child(3) {
+  margin-left: 200px;
+}
+
+.des-content {
+  padding-top: 20px;
+  height: 100px;
+}
+
+.ant-drawer-body > .ant-avatar-image {
+  margin-left: 42%;
+}
