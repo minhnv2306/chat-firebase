@@ -7,12 +7,13 @@ import Sidebar from './Layout/Sidebar';
 import RoomInfo from './Layout/RoomInfo';
 import ChatBox from './Layout/ChatBox';
 import * as roomService from './../services/room';
+import { withRouter } from "react-router";
 
 var db;
 var firebase;
 var _ = require('underscore');
 
-export default class Example extends React.Component {
+class Home extends React.Component {
   state = {
     user: {},
     messages: [],
@@ -21,14 +22,12 @@ export default class Example extends React.Component {
     rooms: []
   };
 
-  componentDidMount() {
+  getMessagesInRoomAndListenerSnapshot(roomId) {
     const _this = this;
-    firebase = setFirebaseConfig();
-    db = firebase.firestore();
 
     var first = db
       .collection('rooms')
-      .where('id', '==', 1)
+      .where('id', '==', roomId)
       .get()
       .then(function(snapshot) {
         snapshot.forEach(function(doc) {
@@ -62,6 +61,39 @@ export default class Example extends React.Component {
           });
         });
       });
+
+    db.collection('rooms')
+      .where('id', '==', roomId)
+      .onSnapshot(function(snapshot) {
+        snapshot.docChanges().forEach(function(change) {
+          var data = change.doc.data();
+
+          _this.setState({
+            messages: data.messages
+          });
+        });
+      });
+  }
+  componentDidUpdate(prevProps) {
+    const roomId = this.props.match.params.roomId;
+
+    if (prevProps.match.params.roomId != this.props.match.params.roomId) {
+      this.setState({
+        messages: [],
+        members: [],
+        roomInfo: {},
+      })
+      this.getMessagesInRoomAndListenerSnapshot(roomId);
+    }
+  };
+
+  componentDidMount() {
+    const _this = this;
+    const roomId = this.props.match.params.roomId;
+
+    firebase = setFirebaseConfig();
+    db = firebase.firestore();
+    this.getMessagesInRoomAndListenerSnapshot(roomId);
 
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
@@ -118,21 +150,10 @@ export default class Example extends React.Component {
         window.location.href = '/login';
       }
     });
-
-    db.collection('rooms')
-      .where('id', '==', 1)
-      .onSnapshot(function(snapshot) {
-        snapshot.docChanges().forEach(function(change) {
-          var data = change.doc.data();
-
-          _this.setState({
-            messages: data.messages
-          });
-        });
-      });
   }
 
   sendMessage = e => {
+    const roomId = this.props.match.params.roomId;
     const content = document.getElementById('js-msg-content').value;
     if (
       ((e.type == 'keyup' && e.key === 'Enter') || e.type == 'click') &&
@@ -144,7 +165,7 @@ export default class Example extends React.Component {
         content: content,
         is_notification: false
       };
-      roomService.sendMessage(db, 1, msgData);
+      roomService.sendMessage(db, roomId, msgData);
       document.getElementById('js-msg-content').value = '';
     }
   };
@@ -156,6 +177,7 @@ export default class Example extends React.Component {
   };
 
   uploadFile = e => {
+    const roomId = this.props.match.params.roomId;
     var _this = this;
     var storage = firebase.storage();
 
@@ -163,7 +185,7 @@ export default class Example extends React.Component {
     var storageRef = storage.ref();
     // Create a child reference
     var fileObj = e.target.files[0];
-    var imagesRef = storageRef.child('images/' + fileObj.name);
+    var imagesRef = storageRef.child('images/' + roomId + '/' + fileObj.name);
 
     // Create the file metadata
     var metadata = {
@@ -171,8 +193,7 @@ export default class Example extends React.Component {
     };
 
     // Upload file and metadata to the object 'images/mountains.jpg'
-    var uploadTask = storageRef
-      .child('images/' + fileObj.name)
+    var uploadTask = imagesRef
       .put(fileObj, metadata);
 
     // Listen for state changes, errors, and completion of the upload.
@@ -221,18 +242,20 @@ export default class Example extends React.Component {
             is_file: true
           };
 
-          roomService.sendMessage(db, 1, msgData);
+          roomService.sendMessage(db, roomId, msgData);
         });
       }
     );
   };
 
   render() {
+    const roomId = this.props.match.params.roomId;
+
     return (
       <div className="div-block">
         <Row>
           <Col span={4}>
-            <Sidebar user={this.state.user} db={db} rooms={this.state.rooms} />
+            <Sidebar user={this.state.user} db={db} rooms={this.state.rooms} currentRoomId={roomId} />
           </Col>
           <Col span={15}>
             <div id="frame">
@@ -289,3 +312,5 @@ export default class Example extends React.Component {
     );
   }
 }
+
+export default withRouter(Home);

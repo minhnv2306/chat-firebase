@@ -11,6 +11,9 @@ function App() {
         <Route path="/login">
           <Login />
         </Route>
+        <Route path="/rooms/:roomId">
+          <Home />
+        </Route>
         <Route path="/">
           <Home />
         </Route>

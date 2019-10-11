@@ -21,6 +21,7 @@ export default class RoomInfo extends Component {
                       <Avatar
                         src={member.avatar}
                         size={80}
+                        key={member.id}
                       />
                     )
                 })
