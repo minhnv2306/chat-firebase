@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Modal, Button } from 'antd';
 import { Input } from 'antd';
 import { List, Avatar, Checkbox, Spin, message, Alert } from 'antd';
+import { Link } from "react-router-dom";
 import { Tabs } from 'antd';
 
 const { TabPane } = Tabs;
@@ -35,8 +36,7 @@ export default class Sidebar extends Component {
     });
   };
 
-  componentDidMount() {}
-  callback = key => {
+  changeTabRequestsAndFriends = key => {
     this.setState({ invites: [] });
     const _this = this;
     if (key == 2) {
@@ -171,6 +171,7 @@ export default class Sidebar extends Component {
   render() {
     var roomsHTML = [];
     var rooms = this.props.rooms;
+    var currentRoomId = this.props.currentRoomId;
 
     if (typeof rooms !== 'undefined' && rooms.length > 0) {
       this.props.rooms.map((room, i) => {
@@ -179,16 +180,20 @@ export default class Sidebar extends Component {
           room.content = room.messages[room.messages.length - 1].content;
         }
 
+        const isActive = (currentRoomId == room.id) ? 'active' : '';
+
         roomsHTML.push(
-          <li key={i} className="contact active">
-            <div className="wrap">
-              <span className="contact-status online" />
-              <img src={room.avatar} alt={room.name} />
-              <div className="meta">
-                <p className="name">{room.name}</p>
-                <p className="preview">{room.content}</p>
+          <li key={i} className={"contact " + isActive} >
+            <Link to={"/rooms/" + room.id}>
+              <div className="wrap">
+                <span className="contact-status online" />
+                <img src={room.avatar} alt={room.name} />
+                <div className="meta">
+                  <p className="name">{room.name}</p>
+                  <p className="preview">{room.content}</p>
+                </div>
               </div>
-            </div>
+            </Link>
           </li>
         );
       });
@@ -254,7 +259,7 @@ export default class Sidebar extends Component {
           onOk={this.handleOk}
           onCancel={this.handleCancel}
         >
-          <Tabs defaultActiveKey="1" onChange={this.callback}>
+          <Tabs defaultActiveKey="1" onChange={this.changeTabRequestsAndFriends}>
             <TabPane tab="Tìm kiếm bạn bè" key="1">
               <Search
                 placeholder="input search text"

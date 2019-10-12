@@ -7,31 +7,69 @@ import Sidebar from './Layout/Sidebar';
 import RoomInfo from './Layout/RoomInfo';
 import ChatBox from './Layout/ChatBox';
 import * as roomService from './../services/room';
+import { withRouter } from "react-router";
 
 var db;
 var firebase;
 var _ = require('underscore');
+var initRoomInfoState = {
+  messages: [],
+  members: [],
+  roomInfo: {},
+  images: []
+};
 
-export default class Example extends React.Component {
+class Home extends React.Component {
   state = {
+    ... initRoomInfoState,
     user: {},
-    messages: [],
-    members: [],
-    roomInfo: {},
-    rooms: []
+    rooms: [],
   };
 
-  componentDidMount() {
+  changeDirectRoomNameAndAvatar(room) {
     const _this = this;
-    firebase = setFirebaseConfig();
-    db = firebase.firestore();
+    const myFriend = _.reject(room.members, {'user' : _this.state.user.uid});
+
+    db.collection('users')
+      .where('id', '==', myFriend[0].user)
+      .get()
+      .then(function(snapshot) {
+        if (snapshot.docs[0]) {
+          let user = snapshot.docs[0].data();
+          let rooms = _this.state.rooms;
+          const indexDirectRoom = _.findIndex(rooms, function(r) {
+            return r.id == room.id;
+          })
+
+          rooms[indexDirectRoom].name = user.name;
+          rooms[indexDirectRoom].avatar = user.avatar;
+
+          _this.setState({
+            rooms: rooms,
+            roomInfo: {
+              name: user.name,
+              avatar: user.avatar
+            }
+          })
+        }
+      });
+  }
+
+  getMessagesInRoomAndListenerSnapshot(roomId) {
+    const _this = this;
 
     var first = db
       .collection('rooms')
-      .where('id', '==', 1)
+      .where('id', '==', roomId)
       .get()
       .then(function(snapshot) {
         snapshot.forEach(function(doc) {
+          let room = doc.data();
+
+          if (room.type == 2) {
+            _this.changeDirectRoomNameAndAvatar(room);
+          }
+
           var messages = doc.data().messages;
           var members = doc.data().members;
 
@@ -62,6 +100,60 @@ export default class Example extends React.Component {
           });
         });
       });
+
+    db.collection('rooms')
+      .where('id', '==', roomId)
+      .onSnapshot(function(snapshot) {
+        snapshot.docChanges().forEach(function(change) {
+          var data = change.doc.data();
+
+          _this.setState({
+            messages: data.messages
+          });
+        });
+      });
+
+    var storage = firebase.storage();
+    // Create a storage reference from our storage service
+    var storageRef = storage.ref();
+    // Create a reference under which you want to list
+    var listRef = storageRef.child('images/' + roomId);
+
+    // Find all the prefixes and items.
+    listRef.listAll().then(function(res) {
+      res.prefixes.forEach(function(folderRef) {
+        // All the prefixes under listRef.
+        // You may call listAll() recursively on them.
+      });
+      res.items.forEach(function(itemRef) {
+        // All the items under listRef.
+        itemRef.getDownloadURL().then(function(downloadURL) {
+          _this.setState({
+            images: [..._this.state.images, downloadURL]
+          })
+        });
+      });
+    }).catch(function(error) {
+      // Uh-oh, an error occurred!
+    });
+  }
+
+  componentDidUpdate(prevProps) {
+    const roomId = this.props.match.params.roomId;
+
+    if (prevProps.match.params.roomId != this.props.match.params.roomId) {
+      this.setState(initRoomInfoState);
+      this.getMessagesInRoomAndListenerSnapshot(roomId);
+    }
+  };
+
+  componentDidMount() {
+    const _this = this;
+    const roomId = this.props.match.params.roomId;
+
+    firebase = setFirebaseConfig();
+    db = firebase.firestore();
+    this.getMessagesInRoomAndListenerSnapshot(roomId);
 
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
@@ -102,6 +194,12 @@ export default class Example extends React.Component {
           .get()
           .then(function(querySnapshot) {
             querySnapshot.forEach(function(doc) {
+              let room = doc.data();
+
+              if (room.type == 2) {
+                _this.changeDirectRoomNameAndAvatar(room);
+              }
+
               _this.setState({
                 rooms: [..._this.state.rooms, doc.data()]
               });
@@ -118,21 +216,10 @@ export default class Example extends React.Component {
         window.location.href = '/login';
       }
     });
-
-    db.collection('rooms')
-      .where('id', '==', 1)
-      .onSnapshot(function(snapshot) {
-        snapshot.docChanges().forEach(function(change) {
-          var data = change.doc.data();
-
-          _this.setState({
-            messages: data.messages
-          });
-        });
-      });
   }
 
   sendMessage = e => {
+    const roomId = this.props.match.params.roomId;
     const content = document.getElementById('js-msg-content').value;
     if (
       ((e.type == 'keyup' && e.key === 'Enter') || e.type == 'click') &&
@@ -144,7 +231,7 @@ export default class Example extends React.Component {
         content: content,
         is_notification: false
       };
-      roomService.sendMessage(db, 1, msgData);
+      roomService.sendMessage(db, roomId, msgData);
       document.getElementById('js-msg-content').value = '';
     }
   };
@@ -156,6 +243,7 @@ export default class Example extends React.Component {
   };
 
   uploadFile = e => {
+    const roomId = this.props.match.params.roomId;
     var _this = this;
     var storage = firebase.storage();
 
@@ -163,7 +251,7 @@ export default class Example extends React.Component {
     var storageRef = storage.ref();
     // Create a child reference
     var fileObj = e.target.files[0];
-    var imagesRef = storageRef.child('images/' + fileObj.name);
+    var imagesRef = storageRef.child('images/' + roomId + '/' + fileObj.name);
 
     // Create the file metadata
     var metadata = {
@@ -171,8 +259,7 @@ export default class Example extends React.Component {
     };
 
     // Upload file and metadata to the object 'images/mountains.jpg'
-    var uploadTask = storageRef
-      .child('images/' + fileObj.name)
+    var uploadTask = imagesRef
       .put(fileObj, metadata);
 
     // Listen for state changes, errors, and completion of the upload.
@@ -221,18 +308,20 @@ export default class Example extends React.Component {
             is_file: true
           };
 
-          roomService.sendMessage(db, 1, msgData);
+          roomService.sendMessage(db, roomId, msgData);
         });
       }
     );
   };
 
   render() {
+    const roomId = this.props.match.params.roomId;
+
     return (
       <div className="div-block">
         <Row>
           <Col span={4}>
-            <Sidebar user={this.state.user} db={db} rooms={this.state.rooms} />
+            <Sidebar user={this.state.user} db={db} rooms={this.state.rooms} currentRoomId={roomId} />
           </Col>
           <Col span={15}>
             <div id="frame">
@@ -282,6 +371,7 @@ export default class Example extends React.Component {
             <RoomInfo
               members={this.state.members}
               roomInfo={this.state.roomInfo}
+              images={this.state.images}
             />
           </Col>
         </Row>
@@ -289,3 +379,5 @@ export default class Example extends React.Component {
     );
   }
 }
+
+export default withRouter(Home);
