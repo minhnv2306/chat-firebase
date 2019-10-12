@@ -12,16 +12,48 @@ import { withRouter } from "react-router";
 var db;
 var firebase;
 var _ = require('underscore');
+var initRoomInfoState = {
+  messages: [],
+  members: [],
+  roomInfo: {},
+  images: []
+};
 
 class Home extends React.Component {
   state = {
+    ... initRoomInfoState,
     user: {},
-    messages: [],
-    members: [],
-    roomInfo: {},
     rooms: [],
-    images: []
   };
+
+  changeDirectRoomNameAndAvatar(room) {
+    const _this = this;
+    const myFriend = _.reject(room.members, {'user' : _this.state.user.uid});
+
+    db.collection('users')
+      .where('id', '==', myFriend[0].user)
+      .get()
+      .then(function(snapshot) {
+        if (snapshot.docs[0]) {
+          let user = snapshot.docs[0].data();
+          let rooms = _this.state.rooms;
+          const indexDirectRoom = _.findIndex(rooms, function(r) {
+            return r.id == room.id;
+          })
+
+          rooms[indexDirectRoom].name = user.name;
+          rooms[indexDirectRoom].avatar = user.avatar;
+
+          _this.setState({
+            rooms: rooms,
+            roomInfo: {
+              name: user.name,
+              avatar: user.avatar
+            }
+          })
+        }
+      });
+  }
 
   getMessagesInRoomAndListenerSnapshot(roomId) {
     const _this = this;
@@ -32,6 +64,12 @@ class Home extends React.Component {
       .get()
       .then(function(snapshot) {
         snapshot.forEach(function(doc) {
+          let room = doc.data();
+
+          if (room.type == 2) {
+            _this.changeDirectRoomNameAndAvatar(room);
+          }
+
           var messages = doc.data().messages;
           var members = doc.data().members;
 
@@ -104,11 +142,7 @@ class Home extends React.Component {
     const roomId = this.props.match.params.roomId;
 
     if (prevProps.match.params.roomId != this.props.match.params.roomId) {
-      this.setState({
-        messages: [],
-        members: [],
-        roomInfo: {},
-      })
+      this.setState(initRoomInfoState);
       this.getMessagesInRoomAndListenerSnapshot(roomId);
     }
   };
@@ -160,6 +194,12 @@ class Home extends React.Component {
           .get()
           .then(function(querySnapshot) {
             querySnapshot.forEach(function(doc) {
+              let room = doc.data();
+
+              if (room.type == 2) {
+                _this.changeDirectRoomNameAndAvatar(room);
+              }
+
               _this.setState({
                 rooms: [..._this.state.rooms, doc.data()]
               });
