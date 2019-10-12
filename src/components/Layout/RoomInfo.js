@@ -7,6 +7,7 @@ const { Panel } = Collapse;
 export default class RoomInfo extends Component {
   render() {
     const members = this.props.members;
+    const images = this.props.images;
     
     return (
       <div id="frame">
@@ -47,44 +48,18 @@ export default class RoomInfo extends Component {
                 ))
               }
             </Panel>
-            <Panel header="Images" key="2">
+            <Panel header="Shared Photos" key="2">
               <div>
-                <img
-                  src="https://www.w3schools.com/bootstrap/cinqueterre.jpg"
-                  heigth="150"
-                  width="33%"
-                  style={{ padding: '3px' }}
-                />
-                <img
-                  src="https://www.w3schools.com/bootstrap/cinqueterre.jpg"
-                  heigth="150"
-                  width="33%"
-                  style={{ padding: '3px' }}
-                />
-                <img
-                  src="https://www.w3schools.com/bootstrap/cinqueterre.jpg"
-                  heigth="150"
-                  width="33%"
-                  style={{ padding: '3px' }}
-                />
-                <img
-                  src="https://www.w3schools.com/bootstrap/cinqueterre.jpg"
-                  heigth="150"
-                  width="33%"
-                  style={{ padding: '3px' }}
-                />
-                <img
-                  src="https://www.w3schools.com/bootstrap/cinqueterre.jpg"
-                  heigth="150"
-                  width="33%"
-                  style={{ padding: '3px' }}
-                />
-                <img
-                  src="https://www.w3schools.com/bootstrap/cinqueterre.jpg"
-                  heigth="150"
-                  width="33%"
-                  style={{ padding: '3px' }}
-                />
+                {
+                  images.map((image, index) => (
+                    <img
+                      src={image}
+                      width="33%"
+                      style={{ padding: '3px' }}
+                      key={index}
+                    />
+                  ))
+                }
               </div>
             </Panel>
           </Collapse>

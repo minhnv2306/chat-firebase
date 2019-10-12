@@ -19,7 +19,8 @@ class Home extends React.Component {
     messages: [],
     members: [],
     roomInfo: {},
-    rooms: []
+    rooms: [],
+    images: []
   };
 
   getMessagesInRoomAndListenerSnapshot(roomId) {
@@ -73,7 +74,32 @@ class Home extends React.Component {
           });
         });
       });
+
+    var storage = firebase.storage();
+    // Create a storage reference from our storage service
+    var storageRef = storage.ref();
+    // Create a reference under which you want to list
+    var listRef = storageRef.child('images/' + roomId);
+
+    // Find all the prefixes and items.
+    listRef.listAll().then(function(res) {
+      res.prefixes.forEach(function(folderRef) {
+        // All the prefixes under listRef.
+        // You may call listAll() recursively on them.
+      });
+      res.items.forEach(function(itemRef) {
+        // All the items under listRef.
+        itemRef.getDownloadURL().then(function(downloadURL) {
+          _this.setState({
+            images: [..._this.state.images, downloadURL]
+          })
+        });
+      });
+    }).catch(function(error) {
+      // Uh-oh, an error occurred!
+    });
   }
+
   componentDidUpdate(prevProps) {
     const roomId = this.props.match.params.roomId;
 
@@ -305,6 +331,7 @@ class Home extends React.Component {
             <RoomInfo
               members={this.state.members}
               roomInfo={this.state.roomInfo}
+              images={this.state.images}
             />
           </Col>
         </Row>
