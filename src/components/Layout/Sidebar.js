@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { Modal, Button } from 'antd';
-import { Input } from 'antd';
+import { Modal, Button, Input } from 'antd';
 import { List, Avatar, Checkbox, Spin, message, Alert } from 'antd';
 import { Link } from "react-router-dom";
 import { Tabs } from 'antd';
+import { generateRoomId } from './../../helpers/function';
 
 const { TabPane } = Tabs;
 const { Search } = Input;
@@ -14,7 +14,8 @@ export default class Sidebar extends Component {
     this.state = {
       visible: false,
       requests: [],
-      invites: []
+      invites: [],
+      visibleCreateRoom: false
     };
   }
 
@@ -156,9 +157,11 @@ export default class Sidebar extends Component {
       });
 
     this.props.db.collection('rooms').add({
+      id: generateRoomId(),
       name: 'Direct chat',
       type: 2,
-      member: [{ role: 2, user: id }, { role: 2, user: _this.props.user.uid }],
+      members: [{ role: 2, user: id }, { role: 2, user: _this.props.user.uid }],
+      messages: [],
       check_members: [id, _this.props.user.uid]
     });
 
@@ -247,12 +250,13 @@ export default class Sidebar extends Component {
               <i className="fa fa-user-plus fa-fw" aria-hidden="true" />{' '}
               <span>Add contact</span>
             </button>
-            <button id="settings">
+            <button id="settings" onClick={this.props.showCreateRoomModal}>
               <i className="fa fa-cog fa-fw" aria-hidden="true" />{' '}
-              <span>Settings</span>
+              <span>Create room</span>
             </button>
           </div>
         </div>
+
         <Modal
           title="Tim kiem ban be"
           visible={this.state.visible}

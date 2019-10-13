@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col, Icon } from 'antd';
+import { Row, Col, Icon, Modal } from 'antd';
 import 'antd/dist/antd.css';
 import '../../src/css/layout.css';
 import setFirebaseConfig from './../helpers/firebase';
@@ -8,6 +8,7 @@ import RoomInfo from './Layout/RoomInfo';
 import ChatBox from './Layout/ChatBox';
 import * as roomService from './../services/room';
 import { withRouter } from "react-router";
+import CreateRoomForm from './Room/CreateRoomForm';
 
 var db;
 var firebase;
@@ -24,6 +25,20 @@ class Home extends React.Component {
     ... initRoomInfoState,
     user: {},
     rooms: [],
+    visibleCreateRoom: false,
+    myFriends: []
+  };
+
+  showCreateRoomModal = () => {
+    this.setState({
+      visibleCreateRoom: true
+    })
+  };
+
+  hideCreateRoomModal = () => {
+    this.setState({
+      visibleCreateRoom: false
+    })
   };
 
   changeDirectRoomNameAndAvatar(room) {
@@ -153,7 +168,10 @@ class Home extends React.Component {
 
     firebase = setFirebaseConfig();
     db = firebase.firestore();
-    this.getMessagesInRoomAndListenerSnapshot(roomId);
+
+    if (roomId) {
+      this.getMessagesInRoomAndListenerSnapshot(roomId);
+    }
 
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
@@ -184,8 +202,44 @@ class Home extends React.Component {
                 id: user.uid,
                 name: user.displayName,
                 email: user.email,
-                avatar: user.photoURL
+                avatar: user.photoURL,
+                friends: [],
+                requests: [],
               });
+            }
+          });
+
+        db.collection('users')
+          .where('id', '==', user.uid)
+          .get()
+          .then(function(snapshot) {
+            if (snapshot.size > 0) {
+              let currentUserInfo = snapshot.docs[0].data();
+
+              if (currentUserInfo.friends.length > 0) {
+                let friends = currentUserInfo.friends;
+
+                console.log(friends);
+                friends.map(function(uid) {
+                  db.collection('users')
+                    .where('id', '==', uid)
+                    .get()
+                    .then(function(snapshot) {
+                      if (snapshot.docs[0]) {
+                        let userTmp = snapshot.docs[0].data();
+                        let friendTmp = {
+                          id: userTmp.id,
+                          name: userTmp.name,
+                          email: userTmp.email,
+                        }
+
+                        _this.setState({
+                          myFriends: [..._this.state.myFriends, friendTmp]
+                        })
+                      }
+                    });
+                })
+              }
             }
           });
 
@@ -316,64 +370,96 @@ class Home extends React.Component {
 
   render() {
     const roomId = this.props.match.params.roomId;
+    const { myFriends } = this.state;
 
     return (
       <div className="div-block">
+        <Modal
+          title="Create new room"
+          visible={this.state.visibleCreateRoom}
+          onOk={this.showCreateRoomModal}
+          onCancel={this.hideCreateRoomModal}
+          footer={null}
+        >
+            <CreateRoomForm
+              friends={this.state.myFriends}
+              db={db}
+              firebase={firebase}
+              user={this.state.user}
+              hideCreateRoomModal={this.hideCreateRoomModal}
+            />
+        </Modal>
+
         <Row>
           <Col span={4}>
-            <Sidebar user={this.state.user} db={db} rooms={this.state.rooms} currentRoomId={roomId} />
-          </Col>
-          <Col span={15}>
-            <div id="frame">
-              <div className="content">
-                <div className="contact-profile">
-                  <img src={this.state.roomInfo.avatar} alt="" />
-                  <p>{this.state.roomInfo.name}</p>
-                  <div className="social-media">
-                    <i className="fa fa-facebook" aria-hidden="true"></i>
-                    <i className="fa fa-twitter" aria-hidden="true"></i>
-                    <i className="fa fa-instagram" aria-hidden="true"></i>
-                  </div>
-                </div>
-                <div className="messages">
-                  <ChatBox
-                    messages={this.state.messages}
-                    members={this.state.members}
-                    uid={this.state.user.uid}
-                  />
-                </div>
-                <div className="message-input">
-                  <div className="wrap">
-                    <input
-                      type="text"
-                      placeholder="Write your message..."
-                      id="js-msg-content"
-                      onKeyUp={this.sendMessage}
-                    />
-                    <input
-                      type="file"
-                      onChange={this.uploadFile}
-                      id="file"
-                      className="file"
-                    />
-                    <button className="upload-image" onClick={this.uploadImage}>
-                      <Icon type="file-image" />
-                    </button>
-                    <button className="submit" onClick={this.sendMessage}>
-                      Send
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Col>
-          <Col span={5}>
-            <RoomInfo
-              members={this.state.members}
-              roomInfo={this.state.roomInfo}
-              images={this.state.images}
+            <Sidebar
+              user={this.state.user}
+              db={db}
+              rooms={this.state.rooms}
+              currentRoomId={roomId}
+              showCreateRoomModal={this.showCreateRoomModal}
             />
           </Col>
+
+          {
+            roomId ? (
+              <React.Fragment>
+                <Col span={15}>
+                  <div id="frame">
+                    <div className="content">
+                      <div className="contact-profile">
+                        <img src={this.state.roomInfo.avatar} alt="" />
+                        <p>{this.state.roomInfo.name}</p>
+                        <div className="social-media">
+                          <i className="fa fa-facebook" aria-hidden="true"></i>
+                          <i className="fa fa-twitter" aria-hidden="true"></i>
+                          <i className="fa fa-instagram" aria-hidden="true"></i>
+                        </div>
+                      </div>
+                      <div className="messages">
+                        <ChatBox
+                          messages={this.state.messages}
+                          members={this.state.members}
+                          uid={this.state.user.uid}
+                        />
+                      </div>
+                      <div className="message-input">
+                        <div className="wrap">
+                          <input
+                            type="text"
+                            placeholder="Write your message..."
+                            id="js-msg-content"
+                            onKeyUp={this.sendMessage}
+                          />
+                          <input
+                            type="file"
+                            onChange={this.uploadFile}
+                            id="file"
+                            className="file"
+                          />
+                          <button className="upload-image" onClick={this.uploadImage}>
+                            <Icon type="file-image" />
+                          </button>
+                          <button className="submit" onClick={this.sendMessage}>
+                            Send
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Col>
+                <Col span={5}>
+                  <RoomInfo
+                    members={this.state.members}
+                    roomInfo={this.state.roomInfo}
+                    images={this.state.images}
+                  />
+                </Col>
+              </React.Fragment>
+            ): (
+              <h1> Select a room to start conversation </h1>
+            )
+          }
         </Row>
       </div>
     );
