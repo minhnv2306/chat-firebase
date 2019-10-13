@@ -4,7 +4,6 @@ body {
   justify-content: center;
   height: 100%;
   width: 100%;
-  background: #27ae60;
   font-family: 'proxima-nova', 'Source Sans Pro', sans-serif;
   font-size: 1em;
   letter-spacing: 0.1px;
@@ -12,6 +11,8 @@ body {
   text-rendering: optimizeLegibility;
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.004);
   -webkit-font-smoothing: antialiased;
+  background-image: url("https://www.w3schools.com/css/img_tree.gif"), url('https://www.w3schools.com/css/paper.gif');
+  background-color: #cccccc;
 }
 html {
   height: 100%;
@@ -805,4 +806,14 @@ html {
 
 .ant-drawer-body > .ant-avatar-image {
   margin-left: 42%;
+}
+
+.room__upload-avatar > .ant-form-item-control-wrapper {
+  margin-left: 10%;
+  margin-top: -28%;
+  width: 100px !important;
+}
+
+.ant-upload-picture-card-wrapper {
+  width: 45% !important;
 }
