@@ -31,8 +31,8 @@ class CreateRoom extends React.Component {
         this.setState({
           imageUrl,
           loading: false,
-          imageOrigin: info.file,
-        }),
+          imageOrigin: info.file
+        })
       );
     }
   };
@@ -41,21 +41,23 @@ class CreateRoom extends React.Component {
     e.preventDefault();
     var _this = this;
     const currentUser = this.props.user;
-    
+
     this.props.form.validateFields((err, values) => {
       if (!err) {
         const db = this.props.db;
-        const membersObj = [{
-          role: 1,
-          user: currentUser.uid
-        }];
+        const membersObj = [
+          {
+            role: 1,
+            user: currentUser.uid
+          }
+        ];
 
         values.members.map(member => {
           membersObj.push({
             role: 1,
             user: member
-          })
-        })
+          });
+        });
 
         if (this.state.imageUrl) {
           var firebase = this.props.firebase;
@@ -64,18 +66,20 @@ class CreateRoom extends React.Component {
           // Create a storage reference from our storage service
           var storageRef = storage.ref();
           // Create a child reference
-          var imagesRef = storageRef.child('room/avatars/' + this.state.imageOrigin.name);
+          var imagesRef = storageRef.child(
+            'room/avatars/' + this.state.imageOrigin.name
+          );
 
           // Upload file and metadata to the object 'images/mountains.jpg'
-          var uploadTask = imagesRef
-            .putString(image, 'data_url');
+          var uploadTask = imagesRef.putString(image, 'data_url');
 
           // Listen for state changes, errors, and completion of the upload.
           uploadTask.on(
             firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
             function(snapshot) {
               // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-              var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              var progress =
+                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
               console.log('Upload is ' + progress + '% done');
               switch (snapshot.state) {
                 case firebase.storage.TaskState.PAUSED: // or 'paused'
@@ -105,21 +109,23 @@ class CreateRoom extends React.Component {
             },
             function() {
               // Upload completed successfully, now we can get the download URL
-              uploadTask.snapshot.ref.getDownloadURL().then(function(downloadURL) {
-                console.log('File available at', downloadURL);
+              uploadTask.snapshot.ref
+                .getDownloadURL()
+                .then(function(downloadURL) {
+                  console.log('File available at', downloadURL);
 
-                db.collection('rooms').add({
-                  name: values.name,
-                  type: 3,
-                  members: membersObj,
-                  check_members: [currentUser.uid, ...values.members],
-                  messages: [],
-                  avatar: downloadURL,
-                  id: generateRoomId()
+                  db.collection('rooms').add({
+                    name: values.name,
+                    type: 3,
+                    members: membersObj,
+                    check_members: [currentUser.uid, ...values.members],
+                    messages: [],
+                    avatar: downloadURL,
+                    id: generateRoomId()
+                  });
                 });
-              });
             }
-          )
+          );
         } else {
           db.collection('rooms').add({
             id: generateRoomId(),
@@ -128,7 +134,8 @@ class CreateRoom extends React.Component {
             members: membersObj,
             check_members: [currentUser.uid, ...values.members],
             messages: [],
-            avatar: 'https://miro.medium.com/max/300/1*R4c8lHBHuH5qyqOtZb3h-w.png'
+            avatar:
+              'https://miro.medium.com/max/300/1*R4c8lHBHuH5qyqOtZb3h-w.png'
           });
         }
         message.success('Create room successfully');
@@ -140,7 +147,7 @@ class CreateRoom extends React.Component {
 
   handleSelectChange = value => {
     this.props.form.setFieldsValue({
-      note: `Hi, ${value === 'male' ? 'man' : 'lady'}!`,
+      note: `Hi, ${value === 'male' ? 'man' : 'lady'}!`
     });
   };
 
@@ -149,19 +156,27 @@ class CreateRoom extends React.Component {
     const { friends } = this.props;
     const friendsHTML = [];
     for (let i = 0; i < friends.length; i++) {
-      friendsHTML.push(<Option key={i.toString(36) + i} value={friends[i].id}>{friends[i].name}</Option>);
+      friendsHTML.push(
+        <Option key={i.toString(36) + i} value={friends[i].id}>
+          {friends[i].name}
+        </Option>
+      );
     }
     return (
-      <Form labelCol={{ span: 5 }} wrapperCol={{ span: 24 }} onSubmit={this.handleSubmit}>
-        <Form.Item wrapperCol={{ span: 12, offset: 10}}>
+      <Form
+        labelCol={{ span: 5 }}
+        wrapperCol={{ span: 24 }}
+        onSubmit={this.handleSubmit}
+      >
+        <Form.Item wrapperCol={{ span: 12, offset: 10 }}>
           {getFieldDecorator('name', {
-            rules: [{ required: true, message: 'Please input room name!' }],
-          })(<Input placeholder="Name"/>)}
+            rules: [{ required: true, message: 'Please input room name!' }]
+          })(<Input placeholder="Name" />)}
         </Form.Item>
-        <Form.Item wrapperCol={{ span: 12 , offset: 10}} >
+        <Form.Item wrapperCol={{ span: 12, offset: 10 }}>
           {getFieldDecorator('members', {
-              rules: [{ required: true, message: 'Please select your friends!' }],
-            })(
+            rules: [{ required: true, message: 'Please select your friends!' }]
+          })(
             <Select
               mode="multiple"
               style={{ width: '100%' }}
@@ -172,9 +187,12 @@ class CreateRoom extends React.Component {
           )}
         </Form.Item>
         <Form.Item wrapperCol={{ span: 12 }} className="room__upload-avatar">
-          <UploadAvatar onChangeAvatar={this.handleChangeAvatar} imageUrl={this.state.imageUrl} />
+          <UploadAvatar
+            onChangeAvatar={this.handleChangeAvatar}
+            imageUrl={this.state.imageUrl}
+          />
         </Form.Item>
-        <Form.Item wrapperCol={{ span: 12, offset: 2 }} >
+        <Form.Item wrapperCol={{ span: 12, offset: 2 }}>
           <Button type="primary" htmlType="submit">
             Create room
           </Button>

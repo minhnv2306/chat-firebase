@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import * as firebaseui from 'firebaseui';
 import setFirebaseConfig from './../helpers/firebase';
 import './../css/login.css';
@@ -39,7 +39,6 @@ export default class Login extends Component {
       privacyPolicyUrl: '<your-privacy-policy-url>'
     };
 
-
     var ui = new firebaseui.auth.AuthUI(firebase.auth());
     // The start method will wait until the DOM is loaded.
     ui.start('#firebaseui-auth-container', uiConfig);
@@ -63,6 +62,6 @@ export default class Login extends Component {
           <div id="loader">Loading...</div>
         </div>
       </div>
-    )
+    );
   }
 }

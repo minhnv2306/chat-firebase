@@ -7,7 +7,7 @@ import Sidebar from './Layout/Sidebar';
 import RoomInfo from './Layout/RoomInfo';
 import ChatBox from './Layout/ChatBox';
 import * as roomService from './../services/room';
-import { withRouter } from "react-router";
+import { withRouter } from 'react-router';
 import CreateRoomForm from './Room/CreateRoomForm';
 
 var db;
@@ -22,7 +22,7 @@ var initRoomInfoState = {
 
 class Home extends React.Component {
   state = {
-    ... initRoomInfoState,
+    ...initRoomInfoState,
     user: {},
     rooms: [],
     visibleCreateRoom: false,
@@ -32,18 +32,18 @@ class Home extends React.Component {
   showCreateRoomModal = () => {
     this.setState({
       visibleCreateRoom: true
-    })
+    });
   };
 
   hideCreateRoomModal = () => {
     this.setState({
       visibleCreateRoom: false
-    })
+    });
   };
 
   changeDirectRoomNameAndAvatar(room) {
     const _this = this;
-    const myFriend = _.reject(room.members, {'user' : _this.state.user.uid});
+    const myFriend = _.reject(room.members, { user: _this.state.user.uid });
 
     db.collection('users')
       .where('id', '==', myFriend[0].user)
@@ -54,7 +54,7 @@ class Home extends React.Component {
           let rooms = _this.state.rooms;
           const indexDirectRoom = _.findIndex(rooms, function(r) {
             return r.id == room.id;
-          })
+          });
 
           rooms[indexDirectRoom].name = user.name;
           rooms[indexDirectRoom].avatar = user.avatar;
@@ -65,7 +65,7 @@ class Home extends React.Component {
               name: user.name,
               avatar: user.avatar
             }
-          })
+          });
         }
       });
   }
@@ -135,22 +135,25 @@ class Home extends React.Component {
     var listRef = storageRef.child('images/' + roomId);
 
     // Find all the prefixes and items.
-    listRef.listAll().then(function(res) {
-      res.prefixes.forEach(function(folderRef) {
-        // All the prefixes under listRef.
-        // You may call listAll() recursively on them.
-      });
-      res.items.forEach(function(itemRef) {
-        // All the items under listRef.
-        itemRef.getDownloadURL().then(function(downloadURL) {
-          _this.setState({
-            images: [..._this.state.images, downloadURL]
-          })
+    listRef
+      .listAll()
+      .then(function(res) {
+        res.prefixes.forEach(function(folderRef) {
+          // All the prefixes under listRef.
+          // You may call listAll() recursively on them.
         });
+        res.items.forEach(function(itemRef) {
+          // All the items under listRef.
+          itemRef.getDownloadURL().then(function(downloadURL) {
+            _this.setState({
+              images: [..._this.state.images, downloadURL]
+            });
+          });
+        });
+      })
+      .catch(function(error) {
+        // Uh-oh, an error occurred!
       });
-    }).catch(function(error) {
-      // Uh-oh, an error occurred!
-    });
   }
 
   componentDidUpdate(prevProps) {
@@ -160,7 +163,7 @@ class Home extends React.Component {
       this.setState(initRoomInfoState);
       this.getMessagesInRoomAndListenerSnapshot(roomId);
     }
-  };
+  }
 
   componentDidMount() {
     const _this = this;
@@ -204,7 +207,7 @@ class Home extends React.Component {
                 email: user.email,
                 avatar: user.photoURL,
                 friends: [],
-                requests: [],
+                requests: []
               });
             }
           });
@@ -230,15 +233,15 @@ class Home extends React.Component {
                         let friendTmp = {
                           id: userTmp.id,
                           name: userTmp.name,
-                          email: userTmp.email,
-                        }
+                          email: userTmp.email
+                        };
 
                         _this.setState({
                           myFriends: [..._this.state.myFriends, friendTmp]
-                        })
+                        });
                       }
                     });
-                })
+                });
               }
             }
           });
@@ -313,8 +316,7 @@ class Home extends React.Component {
     };
 
     // Upload file and metadata to the object 'images/mountains.jpg'
-    var uploadTask = imagesRef
-      .put(fileObj, metadata);
+    var uploadTask = imagesRef.put(fileObj, metadata);
 
     // Listen for state changes, errors, and completion of the upload.
     uploadTask.on(
@@ -381,13 +383,13 @@ class Home extends React.Component {
           onCancel={this.hideCreateRoomModal}
           footer={null}
         >
-            <CreateRoomForm
-              friends={this.state.myFriends}
-              db={db}
-              firebase={firebase}
-              user={this.state.user}
-              hideCreateRoomModal={this.hideCreateRoomModal}
-            />
+          <CreateRoomForm
+            friends={this.state.myFriends}
+            db={db}
+            firebase={firebase}
+            user={this.state.user}
+            hideCreateRoomModal={this.hideCreateRoomModal}
+          />
         </Modal>
 
         <Row>
@@ -401,65 +403,66 @@ class Home extends React.Component {
             />
           </Col>
 
-          {
-            roomId ? (
-              <React.Fragment>
-                <Col span={15}>
-                  <div id="frame">
-                    <div className="content">
-                      <div className="contact-profile">
-                        <img src={this.state.roomInfo.avatar} alt="" />
-                        <p>{this.state.roomInfo.name}</p>
-                        <div className="social-media">
-                          <i className="fa fa-facebook" aria-hidden="true"></i>
-                          <i className="fa fa-twitter" aria-hidden="true"></i>
-                          <i className="fa fa-instagram" aria-hidden="true"></i>
-                        </div>
+          {roomId ? (
+            <React.Fragment>
+              <Col span={15}>
+                <div id="frame">
+                  <div className="content">
+                    <div className="contact-profile">
+                      <img src={this.state.roomInfo.avatar} alt="" />
+                      <p>{this.state.roomInfo.name}</p>
+                      <div className="social-media">
+                        <i className="fa fa-facebook" aria-hidden="true"></i>
+                        <i className="fa fa-twitter" aria-hidden="true"></i>
+                        <i className="fa fa-instagram" aria-hidden="true"></i>
                       </div>
-                      <div className="messages">
-                        <ChatBox
-                          messages={this.state.messages}
-                          members={this.state.members}
-                          uid={this.state.user.uid}
+                    </div>
+                    <div className="messages">
+                      <ChatBox
+                        messages={this.state.messages}
+                        members={this.state.members}
+                        uid={this.state.user.uid}
+                      />
+                    </div>
+                    <div className="message-input">
+                      <div className="wrap">
+                        <input
+                          type="text"
+                          placeholder="Write your message..."
+                          id="js-msg-content"
+                          onKeyUp={this.sendMessage}
                         />
-                      </div>
-                      <div className="message-input">
-                        <div className="wrap">
-                          <input
-                            type="text"
-                            placeholder="Write your message..."
-                            id="js-msg-content"
-                            onKeyUp={this.sendMessage}
-                          />
-                          <input
-                            type="file"
-                            onChange={this.uploadFile}
-                            id="file"
-                            className="file"
-                          />
-                          <button className="upload-image" onClick={this.uploadImage}>
-                            <Icon type="file-image" />
-                          </button>
-                          <button className="submit" onClick={this.sendMessage}>
-                            Send
-                          </button>
-                        </div>
+                        <input
+                          type="file"
+                          onChange={this.uploadFile}
+                          id="file"
+                          className="file"
+                        />
+                        <button
+                          className="upload-image"
+                          onClick={this.uploadImage}
+                        >
+                          <Icon type="file-image" />
+                        </button>
+                        <button className="submit" onClick={this.sendMessage}>
+                          Send
+                        </button>
                       </div>
                     </div>
                   </div>
-                </Col>
-                <Col span={5}>
-                  <RoomInfo
-                    members={this.state.members}
-                    roomInfo={this.state.roomInfo}
-                    images={this.state.images}
-                  />
-                </Col>
-              </React.Fragment>
-            ): (
-              <h1> Select a room to start conversation </h1>
-            )
-          }
+                </div>
+              </Col>
+              <Col span={5}>
+                <RoomInfo
+                  members={this.state.members}
+                  roomInfo={this.state.roomInfo}
+                  images={this.state.images}
+                />
+              </Col>
+            </React.Fragment>
+          ) : (
+            <h1> Select a room to start conversation </h1>
+          )}
         </Row>
       </div>
     );
