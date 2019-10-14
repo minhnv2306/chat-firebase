@@ -1,5 +1,5 @@
 .login__content {
-  padding-top: 50px;
+  padding-top: 20%;
   text-align: center !important;
 }
 
@@ -9,4 +9,9 @@
   height: 55px;
   padding-left: 10%;
   padding-top: 5px;
+}
+
+.header-contributor {
+  width: 100%;
+  height: auto;
 }

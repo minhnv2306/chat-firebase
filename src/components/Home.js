@@ -4,6 +4,7 @@ import 'antd/dist/antd.css';
 import '../../src/css/layout.css';
 import setFirebaseConfig from './../helpers/firebase';
 import Sidebar from './Layout/Sidebar';
+import Header from "./Layout/Header";
 import RoomInfo from './Layout/RoomInfo';
 import ChatBox from './Layout/ChatBox';
 import * as roomService from './../services/room';
@@ -405,7 +406,11 @@ class Home extends React.Component {
             hideCreateRoomModal={this.hideCreateRoomModal}
           />
         </Modal>
-
+        <Row className="class-header">
+          <Col span={24}>
+            <Header />
+          </Col>
+        </Row>
         <Row>
           <Col span={4}>
             <Sidebar
@@ -425,11 +430,6 @@ class Home extends React.Component {
                     <div className="contact-profile">
                       <img src={this.state.roomInfo.avatar} alt="" />
                       <p>{this.state.roomInfo.name}</p>
-                      <div className="social-media">
-                        <i className="fa fa-facebook" aria-hidden="true"></i>
-                        <i className="fa fa-twitter" aria-hidden="true"></i>
-                        <i className="fa fa-instagram" aria-hidden="true"></i>
-                      </div>
                     </div>
                     <div className="messages">
                       <ChatBox
@@ -452,9 +452,9 @@ class Home extends React.Component {
                           id="file"
                           className="file"
                         />
-                        <i class="fa fa-paperclip attachment" aria-hidden="true" onClick={this.uploadImage}></i>
+                        <i className="fa fa-paperclip attachment" aria-hidden="true" onClick={this.uploadImage}></i>
                         <button className="submit" onClick={this.sendMessage}>
-                          <i class="fa fa-paper-plane" aria-hidden="true"></i>
+                          <i className="fa fa-paper-plane" aria-hidden="true"></i>
                         </button>
                       </div>
                     </div>
