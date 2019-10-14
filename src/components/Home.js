@@ -517,7 +517,21 @@ class Home extends React.Component {
               </Col>
             </React.Fragment>
           ) : (
-            <h1> Select a room to start conversation </h1>
+            <div className="chatbox">
+              <Row>
+                <Col span={4}>
+                </Col>
+                <Col span={12} className="no-room">
+                  <h3 className="home-welcome">Welcome, {this.state.user.name}</h3>
+                  <img className="home-avatar" src={this.state.user.photoURL}/>
+                  <p className="home-title">Select a room to start conversation </p>
+                  <div className="home-footer">
+                    <p>You are signed in as <span>{this.state.user.email}</span></p>
+                    <p className="copyright">Copyright © 2019 <span>SKY MT-N</span> - Design by <span>SKY MT-N</span></p>
+                  </div>
+                </Col>
+              </Row>
+            </div>
           )}
         </Row>
       </div>

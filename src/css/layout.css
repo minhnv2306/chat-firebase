@@ -38,6 +38,8 @@ html {
 .class-header {
   background: #fff;
   height: 50px;
+  z-index: 1;
+  box-shadow: 0 0 4px 0 #929292;
 }
 .text-center {
   text-align: center;
@@ -60,6 +62,48 @@ html {
   margin-left: 12px;
   vertical-align: -webkit-baseline-middle;
 }
+.chatbox {
+  height: calc(100vh - 50px);
+}
+.home-avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 3px solid #32ba6d;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+.no-room {
+  text-align: center;
+  padding-top: 12%;
+}
+.home-title {
+  font-style: italic;
+}
+.home-welcome {
+  color: #f59948;
+  font-weight: bold;
+}
+.home-footer {
+  padding-top: 30vh;
+  font-weight: bold;
+  margin-bottom: 0;
+}
+.home-footer span {
+  color: #32ba6d;
+}
+.home-footer p.copyright {
+  font-style: italic;
+  font-weight: normal;
+}
+.home-footer p.copyright span {
+  color: #ff0000;
+  font-weight: bold;
+}
+#frame #sidepanel #contacts ul li.contact a:hover {
+    color: #2c3e50;
+    text-decoration: none;
+}
 @media screen and (min-width: 991px) and (max-width: 1367px) {
   #frame {
     max-height: 100vh;
@@ -81,6 +125,7 @@ html {
   color: #f5f5f5;
   overflow: hidden;
   position: relative;
+  z-index: 1;
 }
 @media screen and (max-width: 735px) {
   #frame #sidepanel {
