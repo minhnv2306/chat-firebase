@@ -275,6 +275,26 @@ class Home extends React.Component {
             });
             console.log('Error getting documents: ', error);
           });
+
+        db.collection('rooms')
+          .where('check_members', 'array-contains', user.uid)
+          .onSnapshot(
+            function(snapshot) {
+              snapshot.docChanges().forEach(function(change) {
+                if (_this.state.rooms && change.doc.data().id) {
+                  const newRoom = _.find(_this.state.rooms, function(room) {
+                    return room.id === change.doc.data().id;
+                  });
+                  if (!newRoom) {
+                    _this.setState({
+                      rooms: [..._this.state.rooms, change.doc.data()]
+                    });
+                  }
+                }
+              });
+            },
+            function(error) {}
+          );
       } else {
         // User is signed out.
         window.location.href = '/login';
@@ -471,7 +491,6 @@ class Home extends React.Component {
                           id="file"
                           className="file"
                         />
-
                         <i
                           className="fa fa-paperclip attachment"
                           aria-hidden="true"
