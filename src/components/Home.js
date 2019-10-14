@@ -4,7 +4,7 @@ import 'antd/dist/antd.css';
 import '../../src/css/layout.css';
 import setFirebaseConfig from './../helpers/firebase';
 import Sidebar from './Layout/Sidebar';
-import Header from "./Layout/Header";
+import Header from './Layout/Header';
 import RoomInfo from './Layout/RoomInfo';
 import ChatBox from './Layout/ChatBox';
 import * as roomService from './../services/room';
@@ -27,7 +27,8 @@ class Home extends React.Component {
     user: {},
     rooms: [],
     visibleCreateRoom: false,
-    myFriends: []
+    myFriends: [],
+    percentUploadFile: 0
   };
 
   showCreateRoomModal = () => {
@@ -45,6 +46,7 @@ class Home extends React.Component {
   changeDirectRoomNameAndAvatar(room) {
     const _this = this;
     const myFriend = _.reject(room.members, { user: _this.state.user.uid });
+    const roomId = this.props.match.params.roomId;
 
     db.collection('users')
       .where('id', '==', myFriend[0].user)
@@ -61,12 +63,17 @@ class Home extends React.Component {
           rooms[indexDirectRoom].avatar = user.avatar;
 
           _this.setState({
-            rooms: rooms,
-            roomInfo: {
-              name: user.name,
-              avatar: user.avatar
-            }
+            rooms: rooms
           });
+
+          if (roomId == room.id) {
+            _this.setState({
+              roomInfo: {
+                name: user.name,
+                avatar: user.avatar
+              }
+            });
+          }
         }
       });
   }
@@ -223,7 +230,6 @@ class Home extends React.Component {
               if (currentUserInfo.friends.length > 0) {
                 let friends = currentUserInfo.friends;
 
-                console.log(friends);
                 friends.map(function(uid) {
                   db.collection('users')
                     .where('id', '==', uid)
@@ -309,7 +315,14 @@ class Home extends React.Component {
     var storageRef = storage.ref();
     // Create a child reference
     var fileObj = e.target.files[0];
-    var imagesRef = storageRef.child('images/' + roomId + '/' + fileObj.name);
+
+    var nameFile = fileObj.name
+      .split('.')
+      .slice(0, -1)
+      .join('.');
+
+    const newNameFile = fileObj.name.replace(nameFile, nameFile + Date.now());
+    var imagesRef = storageRef.child('images/' + roomId + '/' + newNameFile);
 
     // Create the file metadata
     var metadata = {
@@ -325,6 +338,11 @@ class Home extends React.Component {
       function(snapshot) {
         // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
         var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+
+        _this.setState({
+          percentUploadFile: parseInt(progress)
+        });
+
         console.log('Upload is ' + progress + '% done');
         switch (snapshot.state) {
           case firebase.storage.TaskState.PAUSED: // or 'paused'
@@ -436,6 +454,7 @@ class Home extends React.Component {
                         messages={this.state.messages}
                         members={this.state.members}
                         uid={this.state.user.uid}
+                        progress={this.state.percentUploadFile}
                       />
                     </div>
                     <div className="message-input">
@@ -452,9 +471,17 @@ class Home extends React.Component {
                           id="file"
                           className="file"
                         />
-                        <i className="fa fa-paperclip attachment" aria-hidden="true" onClick={this.uploadImage}></i>
+
+                        <i
+                          className="fa fa-paperclip attachment"
+                          aria-hidden="true"
+                          onClick={this.uploadImage}
+                        ></i>
                         <button className="submit" onClick={this.sendMessage}>
-                          <i className="fa fa-paper-plane" aria-hidden="true"></i>
+                          <i
+                            className="fa fa-paper-plane"
+                            aria-hidden="true"
+                          ></i>
                         </button>
                       </div>
                     </div>

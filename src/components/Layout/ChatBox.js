@@ -1,13 +1,16 @@
 import React, { Component } from 'react';
-import { Drawer, Avatar } from 'antd';
+import { Drawer, Avatar, Progress, Modal } from 'antd';
 
 const _ = require('underscore');
 
 export default class ChatBox extends Component {
   state = {
     visible: false,
-    member: {}
+    member: {},
+    isShowImage: false,
+    imageMessageURL: ''
   };
+
   componentDidUpdate() {
     var maxLength = this.props.messages.length;
 
@@ -26,6 +29,20 @@ export default class ChatBox extends Component {
     this.setState({
       visible: true,
       member: member
+    });
+  };
+
+  showImageModal = imageURL => {
+    this.setState({
+      isShowImage: true,
+      imageMessageURL: imageURL
+    });
+  };
+
+  hideImageModal = () => {
+    this.setState({
+      isShowImage: false,
+      imageMessageURL: ''
     });
   };
 
@@ -52,7 +69,11 @@ export default class ChatBox extends Component {
               onClick={() => this.showDrawer(m.user)}
             />
             {m.is_file ? (
-              <img className="image-msg img-rounded" src={m.content} />
+              <img
+                className="image-msg img-rounded"
+                src={m.content}
+                onClick={() => this.showImageModal(m.content)}
+              />
             ) : (
               <p>{m.content}</p>
             )}
@@ -61,9 +82,24 @@ export default class ChatBox extends Component {
       }
     });
 
+    var progressHTML;
+
+    if (this.props.progress > 0 && this.props.progress < 100) {
+      progressHTML = (
+        <li className="replies">
+          <Progress type="circle" percent={this.props.progress} width={60} />
+        </li>
+      );
+    } else {
+      progressHTML = '';
+    }
+
     return (
       <div>
-        <ul>{messagesHTML}</ul>
+        <ul>
+          {messagesHTML}
+          {progressHTML}
+        </ul>
         <Drawer
           title="User information"
           placement="right"
@@ -76,6 +112,15 @@ export default class ChatBox extends Component {
           <p style={{ paddingTop: '20px' }}>User name: {member.name}</p>
           <p>Email: {member.email}</p>
         </Drawer>
+
+        <Modal
+          title="Image"
+          visible={this.state.isShowImage}
+          onCancel={this.hideImageModal}
+          footer={null}
+        >
+          <img src={this.state.imageMessageURL} width="100%" />
+        </Modal>
       </div>
     );
   }
