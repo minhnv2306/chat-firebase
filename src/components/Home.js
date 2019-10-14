@@ -4,7 +4,7 @@ import 'antd/dist/antd.css';
 import '../../src/css/layout.css';
 import setFirebaseConfig from './../helpers/firebase';
 import Sidebar from './Layout/Sidebar';
-import Header from "./Layout/Header";
+import Header from './Layout/Header';
 import RoomInfo from './Layout/RoomInfo';
 import ChatBox from './Layout/ChatBox';
 import * as roomService from './../services/room';
@@ -45,6 +45,7 @@ class Home extends React.Component {
   changeDirectRoomNameAndAvatar(room) {
     const _this = this;
     const myFriend = _.reject(room.members, { user: _this.state.user.uid });
+    const roomId = this.props.match.params.roomId;
 
     db.collection('users')
       .where('id', '==', myFriend[0].user)
@@ -61,12 +62,17 @@ class Home extends React.Component {
           rooms[indexDirectRoom].avatar = user.avatar;
 
           _this.setState({
-            rooms: rooms,
-            roomInfo: {
-              name: user.name,
-              avatar: user.avatar
-            }
+            rooms: rooms
           });
+
+          if (roomId == room.id) {
+            _this.setState({
+              roomInfo: {
+                name: user.name,
+                avatar: user.avatar
+              }
+            });
+          }
         }
       });
   }
@@ -223,7 +229,6 @@ class Home extends React.Component {
               if (currentUserInfo.friends.length > 0) {
                 let friends = currentUserInfo.friends;
 
-                console.log(friends);
                 friends.map(function(uid) {
                   db.collection('users')
                     .where('id', '==', uid)
@@ -452,9 +457,17 @@ class Home extends React.Component {
                           id="file"
                           className="file"
                         />
-                        <i className="fa fa-paperclip attachment" aria-hidden="true" onClick={this.uploadImage}></i>
+
+                        <i
+                          class="fa fa-paperclip attachment"
+                          aria-hidden="true"
+                          onClick={this.uploadImage}
+                        ></i>
                         <button className="submit" onClick={this.sendMessage}>
-                          <i className="fa fa-paper-plane" aria-hidden="true"></i>
+                          <i
+                            className="fa fa-paper-plane"
+                            aria-hidden="true"
+                          ></i>
                         </button>
                       </div>
                     </div>
