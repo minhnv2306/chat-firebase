@@ -11,7 +11,7 @@ body {
   text-rendering: optimizeLegibility;
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.004);
   -webkit-font-smoothing: antialiased;
-  background-image: url('https://www.w3schools.com/css/img_tree.gif'),
+  background-image: url('http://cdn.hoahoctro.vn/uploads/2017/02/58a1fe4bad205-12.jpg'),
     url('https://www.w3schools.com/css/paper.gif');
   background-color: #cccccc;
 }
@@ -817,4 +817,8 @@ html {
 
 .ant-upload-picture-card-wrapper {
   width: 45% !important;
+}
+.logout {
+  float: right;
+  margin-top: 4%;
 }
