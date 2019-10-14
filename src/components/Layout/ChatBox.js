@@ -19,9 +19,9 @@ export default class ChatBox extends Component {
     }
   }
 
-  showDrawer = (memberId) => {
+  showDrawer = memberId => {
     const { members } = this.props;
-    const member = _.findWhere(members, {id: memberId});
+    const member = _.findWhere(members, { id: memberId });
 
     this.setState({
       visible: true,
@@ -31,7 +31,7 @@ export default class ChatBox extends Component {
 
   onClose = () => {
     this.setState({
-      visible: false,
+      visible: false
     });
   };
 
@@ -44,11 +44,18 @@ export default class ChatBox extends Component {
       var userInfo = _.findWhere(members, { id: m.user });
 
       if (userInfo) {
-        const className = (userInfo.id == uid) ? 'replies' : 'sent';
+        const className = userInfo.id == uid ? 'replies' : 'sent';
         messagesHTML.push(
           <li className={className} ref={index} key={index}>
-            <img src={userInfo.avatar} onClick={() => this.showDrawer(m.user)} />
-            { m.is_file ? (<img className="image-msg img-rounded" src={m.content} />) : (<p>{m.content}</p>)}
+            <img
+              src={userInfo.avatar}
+              onClick={() => this.showDrawer(m.user)}
+            />
+            {m.is_file ? (
+              <img className="image-msg img-rounded" src={m.content} />
+            ) : (
+              <p>{m.content}</p>
+            )}
           </li>
         );
       }

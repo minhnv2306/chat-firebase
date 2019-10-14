@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 import 'antd/dist/antd.css';
@@ -39,7 +38,11 @@ export default class UploadAvatar extends React.Component {
         beforeUpload={beforeUpload}
         onChange={this.props.onChangeAvatar}
       >
-        {imageUrl ? <img src={imageUrl} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
+        {imageUrl ? (
+          <img src={imageUrl} alt="avatar" style={{ width: '100%' }} />
+        ) : (
+          uploadButton
+        )}
       </Upload>
     );
   }
