@@ -27,7 +27,8 @@ class Home extends React.Component {
     user: {},
     rooms: [],
     visibleCreateRoom: false,
-    myFriends: []
+    myFriends: [],
+    percentUploadFile: 0
   };
 
   showCreateRoomModal = () => {
@@ -314,7 +315,14 @@ class Home extends React.Component {
     var storageRef = storage.ref();
     // Create a child reference
     var fileObj = e.target.files[0];
-    var imagesRef = storageRef.child('images/' + roomId + '/' + fileObj.name);
+
+    var nameFile = fileObj.name
+      .split('.')
+      .slice(0, -1)
+      .join('.');
+
+    const newNameFile = fileObj.name.replace(nameFile, nameFile + Date.now());
+    var imagesRef = storageRef.child('images/' + roomId + '/' + newNameFile);
 
     // Create the file metadata
     var metadata = {
@@ -330,6 +338,11 @@ class Home extends React.Component {
       function(snapshot) {
         // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
         var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+
+        _this.setState({
+          percentUploadFile: parseInt(progress)
+        });
+
         console.log('Upload is ' + progress + '% done');
         switch (snapshot.state) {
           case firebase.storage.TaskState.PAUSED: // or 'paused'
@@ -441,6 +454,7 @@ class Home extends React.Component {
                         messages={this.state.messages}
                         members={this.state.members}
                         uid={this.state.user.uid}
+                        progress={this.state.percentUploadFile}
                       />
                     </div>
                     <div className="message-input">
@@ -459,7 +473,7 @@ class Home extends React.Component {
                         />
 
                         <i
-                          class="fa fa-paperclip attachment"
+                          className="fa fa-paperclip attachment"
                           aria-hidden="true"
                           onClick={this.uploadImage}
                         ></i>

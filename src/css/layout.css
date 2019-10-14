@@ -862,3 +862,7 @@ html {
   float: right;
   margin-top: 4%;
 }
+
+.replies > .ant-progress {
+  float: right;
+}

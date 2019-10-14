@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Drawer, Avatar } from 'antd';
+import { Drawer, Avatar, Progress } from 'antd';
 
 const _ = require('underscore');
 
@@ -61,9 +61,24 @@ export default class ChatBox extends Component {
       }
     });
 
+    var progressHTML;
+
+    if (this.props.progress > 0 && this.props.progress < 100) {
+      progressHTML = (
+        <li className="replies">
+          <Progress type="circle" percent={this.props.progress} width={60} />
+        </li>
+      );
+    } else {
+      progressHTML = '';
+    }
+
     return (
       <div>
-        <ul>{messagesHTML}</ul>
+        <ul>
+          {messagesHTML}
+          {progressHTML}
+        </ul>
         <Drawer
           title="User information"
           placement="right"
