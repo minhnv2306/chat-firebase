@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import * as firebaseui from 'firebaseui';
+import { Row, Col } from "antd";
 import setFirebaseConfig from './../helpers/firebase';
 import './../css/login.css';
 
@@ -56,11 +57,22 @@ export default class Login extends Component {
     return (
       <div>
         <h1 className="header"> Sky'sssss </h1>
-        <div className="login__content">
-          <h2> Login to sky'ss app </h2>
-          <div id="firebaseui-auth-container"></div>
-          <div id="loader">Loading...</div>
-        </div>
+        <Row>
+          <Col span={12}>
+            <div className="login__content">
+              <h2> Login to sky'ss app </h2>
+              <div id="firebaseui-auth-container"></div>
+              <div id="loader">Loading...</div>
+            </div>
+          </Col>
+          <Col span={3}>
+          </Col>
+          <Col span={5}>
+            <div className="login__content">
+              <img className="header-contributor" src="../public/../IMG_0190.JPEG" alt="Contributor"/>
+            </div>
+          </Col>
+        </Row>
       </div>
     );
   }
