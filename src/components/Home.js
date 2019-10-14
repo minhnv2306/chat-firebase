@@ -255,41 +255,25 @@ class Home extends React.Component {
 
         db.collection('rooms')
           .where('check_members', 'array-contains', user.uid)
-          .get()
-          .then(function(querySnapshot) {
-            querySnapshot.forEach(function(doc) {
-              let room = doc.data();
-
-              if (room.type == 2) {
-                _this.changeDirectRoomNameAndAvatar(room);
-              }
-
-              _this.setState({
-                rooms: [..._this.state.rooms, doc.data()]
-              });
-            });
-          })
-          .catch(function(error) {
-            _this.setState({
-              rooms: []
-            });
-            console.log('Error getting documents: ', error);
-          });
-
-        db.collection('rooms')
-          .where('check_members', 'array-contains', user.uid)
           .onSnapshot(
             function(snapshot) {
               snapshot.docChanges().forEach(function(change) {
-                if (_this.state.rooms && change.doc.data().id) {
-                  const newRoom = _.find(_this.state.rooms, function(room) {
-                    return room.id === change.doc.data().id;
-                  });
-                  if (!newRoom) {
-                    _this.setState({
-                      rooms: [..._this.state.rooms, change.doc.data()]
-                    });
+                if (change.type === 'added') {
+                  let room = change.doc.data();
+
+                  if (room.type == 2) {
+                    _this.changeDirectRoomNameAndAvatar(room);
                   }
+
+                  _this.setState({
+                    rooms: [..._this.state.rooms, room]
+                  });
+                }
+                if (change.type === 'modified') {
+                  console.log('Modified city: ', change.doc.data());
+                }
+                if (change.type === 'removed') {
+                  console.log('Removed city: ', change.doc.data());
                 }
               });
             },
