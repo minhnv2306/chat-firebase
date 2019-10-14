@@ -49,7 +49,7 @@ export default class RoomInfo extends Component {
                 {images.map((image, index) => (
                   <img
                     src={image}
-                    width="33%"
+                    className="shared-photos"
                     style={{ padding: '3px' }}
                     key={index}
                   />

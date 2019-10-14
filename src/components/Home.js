@@ -452,14 +452,9 @@ class Home extends React.Component {
                           id="file"
                           className="file"
                         />
-                        <button
-                          className="upload-image"
-                          onClick={this.uploadImage}
-                        >
-                          <Icon type="file-image" />
-                        </button>
+                        <i class="fa fa-paperclip attachment" aria-hidden="true" onClick={this.uploadImage}></i>
                         <button className="submit" onClick={this.sendMessage}>
-                          Send
+                          <i class="fa fa-paper-plane" aria-hidden="true"></i>
                         </button>
                       </div>
                     </div>
