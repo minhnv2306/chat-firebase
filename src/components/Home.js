@@ -370,6 +370,20 @@ class Home extends React.Component {
     );
   };
 
+  logout = () => {
+    firebase
+      .auth()
+      .signOut()
+      .then(
+        function() {
+          // Sign-out successful.
+        },
+        function(error) {
+          // An error happened.
+        }
+      );
+  };
+
   render() {
     const roomId = this.props.match.params.roomId;
     const { myFriends } = this.state;
@@ -454,6 +468,7 @@ class Home extends React.Component {
               </Col>
               <Col span={5}>
                 <RoomInfo
+                  logout={this.logout}
                   members={this.state.members}
                   roomInfo={this.state.roomInfo}
                   images={this.state.images}

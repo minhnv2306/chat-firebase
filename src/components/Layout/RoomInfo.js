@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import '../../../src/css/description.css';
 import { Avatar, Tag, Collapse } from 'antd';
-
+import { Button } from 'antd';
 const { Panel } = Collapse;
-
 export default class RoomInfo extends Component {
   render() {
     const members = this.props.members;
@@ -12,7 +11,12 @@ export default class RoomInfo extends Component {
     return (
       <div id="frame">
         <div className="content">
-          <div className="contact-profile"></div>
+          <div className="contact-profile">
+            {' '}
+            <Button className="logout" onClick={this.props.logout}>
+              Logout
+            </Button>
+          </div>
           <div className="description">
             <div className="des-content">
               {members.map((member, index) => {
