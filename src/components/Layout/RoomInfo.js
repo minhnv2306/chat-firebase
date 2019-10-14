@@ -1,9 +1,28 @@
 import React, { Component } from 'react';
 import '../../../src/css/description.css';
-import { Avatar, Tag, Collapse } from 'antd';
+import { Avatar, Tag, Collapse, Modal } from 'antd';
 import { Button } from 'antd';
 const { Panel } = Collapse;
 export default class RoomInfo extends Component {
+  state = {
+    imageURL: '',
+    isShowImage: false
+  };
+
+  showImageModal = imageURL => {
+    this.setState({
+      isShowImage: true,
+      imageURL: imageURL
+    });
+  };
+
+  hideImageModal = () => {
+    this.setState({
+      isShowImage: false,
+      imageURL: ''
+    });
+  };
+
   render() {
     const members = this.props.members;
     const images = this.props.images;
@@ -52,11 +71,20 @@ export default class RoomInfo extends Component {
                     className="shared-photos"
                     style={{ padding: '3px' }}
                     key={index}
+                    onClick={() => this.showImageModal(image)}
                   />
                 ))}
               </div>
             </Panel>
           </Collapse>
+          <Modal
+            title="Image"
+            visible={this.state.isShowImage}
+            onCancel={this.hideImageModal}
+            footer={null}
+          >
+            <img src={this.state.imageURL} width="100%" />
+          </Modal>
         </div>
       </div>
     );
