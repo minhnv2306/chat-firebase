@@ -11,10 +11,9 @@ body {
   text-rendering: optimizeLegibility;
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.004);
   -webkit-font-smoothing: antialiased;
-  background-image: url('https://www.yazilimarsiv.com/wp-content/uploads/2019/07/Sky.jpg'),
+  background-image: url('Sky.jpg'),
     url('https://www.w3schools.com/css/paper.gif');
   background-color: #cccccc;
-  background-position: 50% -40%;
 }
 html {
   height: 100%;

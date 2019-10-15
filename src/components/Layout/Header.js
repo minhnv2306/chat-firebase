@@ -324,6 +324,17 @@ export default class Header extends Component {
                   onClick={this.props.showCreateRoomModal}
                 />
               </Col>
+
+              <Col span={3}>
+                <Button
+                  type="danger"
+                  size="large"
+                  style={{ marginTop: '3px' }}
+                  onClick={this.props.logout}
+                >
+                  Logout
+                </Button>
+              </Col>
             </Row>
           </Col>
           <Col span={5} />

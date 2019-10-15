@@ -452,6 +452,7 @@ class Home extends React.Component {
               user={this.state.user}
               db={db}
               showCreateRoomModal={this.showCreateRoomModal}
+              logout={this.logout}
             />
           </Col>
         </Row>
@@ -515,7 +516,6 @@ class Home extends React.Component {
               </Col>
               <Col span={5}>
                 <RoomInfo
-                  logout={this.logout}
                   members={this.state.members}
                   roomInfo={this.state.roomInfo}
                   images={this.state.images}
