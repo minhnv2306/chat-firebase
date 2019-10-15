@@ -30,12 +30,6 @@ export default class RoomInfo extends Component {
     return (
       <div id="frame">
         <div className="content">
-          <div className="contact-profile">
-            {' '}
-            <Button className="logout" onClick={this.props.logout}>
-              Logout
-            </Button>
-          </div>
           <div className="description">
             <div className="des-content">
               {members.map((member, index) => {
