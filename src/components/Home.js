@@ -168,6 +168,18 @@ class Home extends React.Component {
     const roomId = this.props.match.params.roomId;
 
     if (prevProps.match.params.roomId != this.props.match.params.roomId) {
+      // Restart unread message number
+      const rooms = this.state.rooms;
+      const indexRoom = _.findIndex(rooms, {
+        id: roomId
+      });
+      rooms[indexRoom].unReadMessageNumber = 0;
+
+      this.setState({
+        rooms
+      });
+
+      // Restart state for new room
       this.setState(initRoomInfoState);
       this.getMessagesInRoomAndListenerSnapshot(roomId);
     }
@@ -270,7 +282,22 @@ class Home extends React.Component {
                   });
                 }
                 if (change.type === 'modified') {
-                  console.log('Modified city: ', change.doc.data());
+                  const room = change.doc.data();
+                  const roomId = _this.props.match.params.roomId;
+
+                  if (room.id != roomId) {
+                    const rooms = _this.state.rooms;
+                    const indexRoom = _.findIndex(rooms, {
+                      id: room.id
+                    });
+
+                    rooms[indexRoom].unReadMessageNumber =
+                      room.messages.length - rooms[indexRoom].messages.length;
+
+                    _this.setState({
+                      rooms
+                    });
+                  }
                 }
                 if (change.type === 'removed') {
                   console.log('Removed city: ', change.doc.data());
@@ -503,15 +530,23 @@ class Home extends React.Component {
           ) : (
             <div className="chatbox">
               <Row>
-                <Col span={4}>
-                </Col>
+                <Col span={4}></Col>
                 <Col span={12} className="no-room">
-                  <h3 className="home-welcome">Welcome, {this.state.user.name}</h3>
-                  <img className="home-avatar" src={this.state.user.photoURL}/>
-                  <p className="home-title">Select a room to start conversation </p>
+                  <h3 className="home-welcome">
+                    Welcome, {this.state.user.name}
+                  </h3>
+                  <img className="home-avatar" src={this.state.user.photoURL} />
+                  <p className="home-title">
+                    Select a room to start conversation{' '}
+                  </p>
                   <div className="home-footer">
-                    <p>You are signed in as <span>{this.state.user.email}</span></p>
-                    <p className="copyright">Copyright © 2019 <span>SKY MT-N</span> - Design by <span>SKY MT-N</span></p>
+                    <p>
+                      You are signed in as <span>{this.state.user.email}</span>
+                    </p>
+                    <p className="copyright">
+                      Copyright © 2019 <span>SKY MT-N</span> - Design by{' '}
+                      <span>SKY MT-N</span>
+                    </p>
                   </div>
                 </Col>
               </Row>

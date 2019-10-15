@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import { Modal, Button, Input } from 'antd';
-import { List, Avatar, Checkbox, Spin, message, Alert } from 'antd';
+import { List, Avatar, Checkbox, Spin, message, Alert, Badge } from 'antd';
 import { Link } from 'react-router-dom';
 import { Tabs } from 'antd';
 import { generateRoomId } from './../../helpers/function';
 
 const { TabPane } = Tabs;
 const { Search } = Input;
+var _ = require('underscore');
 
 export default class Sidebar extends Component {
   constructor(props) {
@@ -171,6 +172,20 @@ export default class Sidebar extends Component {
     message.success('Chấp nhận lời mời kết bạn thành công', 10);
   };
 
+  componentDidUpdate() {
+    const rooms = this.props.rooms;
+    const roomHasUnReadMsg = _.filter(rooms, function(r) {
+      return r.unReadMessageNumber;
+    });
+
+    if (roomHasUnReadMsg.length > 0) {
+      document.getElementsByTagName('title')[0].innerHTML =
+        "Sky'ss(" + roomHasUnReadMsg.length + ')';
+    } else {
+      document.getElementsByTagName('title')[0].innerHTML = "Sky'ss";
+    }
+  }
+
   render() {
     var roomsHTML = [];
     var rooms = this.props.rooms;
@@ -192,7 +207,11 @@ export default class Sidebar extends Component {
                 <span className="contact-status online" />
                 <img src={room.avatar} alt={room.name} />
                 <div className="meta">
-                  <p className="name">{room.name}</p>
+                  <p className="name">
+                    {room.name}
+                    {room.unReadMessageNumber > 0 &&
+                      ' (' + room.unReadMessageNumber + ')'}
+                  </p>
                   <p className="preview">{room.content}</p>
                 </div>
               </div>
@@ -247,11 +266,11 @@ export default class Sidebar extends Component {
           </div>
           <div id="bottom-bar">
             <button id="addcontact" onClick={this.showModal}>
-              <i className="fa fa-user-plus fa-fw" aria-hidden="true" />{' '}
+              <i className="fa fa-user-plus fa-fw" aria-hidden="true" />
               <span>Add contact</span>
             </button>
             <button id="settings" onClick={this.props.showCreateRoomModal}>
-              <i className="fa fa-cog fa-fw" aria-hidden="true" />{' '}
+              <i className="fa fa-cog fa-fw" aria-hidden="true" />
               <span>Create room</span>
             </button>
           </div>
