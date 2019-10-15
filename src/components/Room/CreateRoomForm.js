@@ -91,6 +91,7 @@ class CreateRoom extends React.Component {
               }
             },
             function(error) {
+              message.error('Create room failed');
               // A full list of error codes is available at
               // https://firebase.google.com/docs/storage/web/handle-errors
               switch (error.code) {
@@ -123,6 +124,9 @@ class CreateRoom extends React.Component {
                     avatar: downloadURL,
                     id: generateRoomId()
                   });
+
+                  this.props.form.resetFields();
+                  message.success('Create room successfully');
                 });
             }
           );
@@ -137,8 +141,10 @@ class CreateRoom extends React.Component {
             avatar:
               'https://miro.medium.com/max/300/1*R4c8lHBHuH5qyqOtZb3h-w.png'
           });
+
+          this.props.form.resetFields();
+          message.success('Create room successfully');
         }
-        message.success('Create room successfully');
 
         _this.props.hideCreateRoomModal();
       }
