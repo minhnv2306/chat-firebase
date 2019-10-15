@@ -457,7 +457,11 @@ class Home extends React.Component {
         </Modal>
         <Row className="class-header">
           <Col span={24}>
-            <Header />
+            <Header
+              user={this.state.user}
+              db={db}
+              showCreateRoomModal={this.showCreateRoomModal}
+            />
           </Col>
         </Row>
         <Row>
@@ -544,7 +548,7 @@ class Home extends React.Component {
                       You are signed in as <span>{this.state.user.email}</span>
                     </p>
                     <p className="copyright">
-                      Copyright © 2019 <span>SKY MT-N</span> - Design by{' '}
+                      Copyright © 2019 <span>SKY MT-N</span> - Design by
                       <span>SKY MT-N</span>
                     </p>
                   </div>
