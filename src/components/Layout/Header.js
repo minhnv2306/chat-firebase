@@ -101,7 +101,7 @@ export default class Header extends Component {
             .collection('users')
             .doc(doc.id)
             .update({ requests: data.requests.concat(_this.props.user.uid) });
-          message.success('Send friend request successfully', 10);
+          message.success('Send friend request successfully');
         });
       });
 
@@ -196,7 +196,7 @@ export default class Header extends Component {
     this.setState(prevState => ({
       invites: prevState.invites.filter(item => item.id != id)
     }));
-    message.success('Accept successfully', 10);
+    message.success('Accept successfully');
   };
   render() {
     const data = this.state.invites;
@@ -212,11 +212,12 @@ export default class Header extends Component {
               description={item.email}
             />
 
-            <Button.Group className="btn-accept">
-              <Button onClick={() => this.handleAcceptRequest(item.id)}>
-                Accept
-              </Button>
-            </Button.Group>
+            <Button
+              onClick={() => this.handleAcceptRequest(item.id)}
+              style={{ marginRight: '10px' }}
+            >
+              Accept
+            </Button>
           </List.Item>
         )}
       />
@@ -248,21 +249,19 @@ export default class Header extends Component {
 
                   <Button.Group className="btn-accept">
                     {item.requests.includes(this.props.user.uid) ? (
-                      <Button className="friends">
-                        Đã gửi lời mời kết bạn
-                      </Button>
+                      <Button className="friends">Sent the request</Button>
                     ) : (
                       ''
                     )}
                     {item.friends.includes(this.props.user.uid) ? (
-                      <Button className="friends"> Đã là bạn bè</Button>
+                      <Button className="friends"> Friends </Button>
                     ) : (
                       ''
                     )}
                     {!item.requests.includes(this.props.user.uid) &&
                     !item.friends.includes(this.props.user.uid) ? (
                       <Button onClick={() => this.hanleSendRequest(item.id)}>
-                        Gửi lời mời kết bạn
+                        Send request
                       </Button>
                     ) : (
                       ''

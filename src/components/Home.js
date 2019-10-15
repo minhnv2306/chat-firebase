@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col, Icon, Modal } from 'antd';
+import { Row, Col, Modal } from 'antd';
 import 'antd/dist/antd.css';
 import '../../src/css/layout.css';
 import setFirebaseConfig from './../helpers/firebase';
@@ -81,8 +81,7 @@ class Home extends React.Component {
   getMessagesInRoomAndListenerSnapshot(roomId) {
     const _this = this;
 
-    var first = db
-      .collection('rooms')
+    db.collection('rooms')
       .where('id', '==', roomId)
       .get()
       .then(function(snapshot) {
@@ -199,14 +198,6 @@ class Home extends React.Component {
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
         // User is signed in.
-        var displayName = user.displayName;
-        var email = user.email;
-        var emailVerified = user.emailVerified;
-        var photoURL = user.photoURL;
-        var isAnonymous = user.isAnonymous;
-        var uid = user.uid;
-        var providerData = user.providerData;
-
         _this.setState({
           user: {
             name: user.displayName,

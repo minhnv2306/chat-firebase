@@ -1,12 +1,6 @@
 import React, { Component } from 'react';
-import { Modal, Button, Input } from 'antd';
-import { List, Avatar, Checkbox, Spin, message, Alert, Badge } from 'antd';
 import { Link } from 'react-router-dom';
-import { Tabs } from 'antd';
-import { generateRoomId } from './../../helpers/function';
 
-const { TabPane } = Tabs;
-const { Search } = Input;
 var _ = require('underscore');
 
 export default class Sidebar extends Component {
