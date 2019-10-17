@@ -69,7 +69,7 @@ export default class Login extends Component {
           </Col>
           <Col span={5}>
             <div className="login__content">
-              <img className="header-contributor" src="../public/../IMG_0190.JPEG" alt="Contributor"/>
+              <img className="header-contributor" src="../public/../IMG_0190.jpg" alt="Contributor"/>
             </div>
           </Col>
         </Row>
