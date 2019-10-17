@@ -92,7 +92,6 @@ class Home extends React.Component {
             _this.changeDirectRoomNameAndAvatar(room);
           }
 
-          var messages = doc.data().messages;
           var members = doc.data().members;
 
           members.map(async m => {
@@ -114,7 +113,6 @@ class Home extends React.Component {
           });
 
           _this.setState({
-            messages: messages,
             roomInfo: {
               name: doc.data().name,
               avatar: doc.data().avatar
@@ -129,9 +127,11 @@ class Home extends React.Component {
         snapshot.docChanges().forEach(function(change) {
           var data = change.doc.data();
 
-          _this.setState({
-            messages: data.messages
-          });
+          if (roomId == _this.props.match.params.roomId) {
+            _this.setState({
+              messages: data.messages
+            });
+          }
         });
       });
 
