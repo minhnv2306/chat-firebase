@@ -867,6 +867,7 @@ html {
 .image-msg {
   width: 150px !important;
   border-radius: 0% !important;
+  padding-bottom: 7px;
 }
 
 .file {
@@ -931,4 +932,30 @@ html {
 
 .ant-scroll-number {
   margin-top: 15px;
+}
+
+.sent-no-avatar {
+  padding-left: 30px;
+  margin-top: 0px !important;
+}
+
+.replie-no-avatar {
+  padding-right: 30px;
+  margin-top: 0px !important;
+}
+
+.hrdivider {
+  position: relative;
+  margin-bottom: 20px;
+  width: 100%;
+  text-align: center;
+}
+
+.hrdivider > span {
+  position: absolute;
+  top: -11px;
+  background: #fff;
+  padding: 0 20px;
+  font-weight: bold;
+  font-size: 16px;
 }

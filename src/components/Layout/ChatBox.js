@@ -57,27 +57,124 @@ export default class ChatBox extends Component {
     var messagesHTML = [];
     const { members, uid } = this.props;
     const { member } = this.state;
+    const messages = this.props.messages;
 
-    this.props.messages.map((m, index) => {
+    messages.map((m, index) => {
       var userInfo = _.findWhere(members, { id: m.user });
+      var isShowAvatar =
+        index > 0 && messages[index].user != messages[index - 1].user;
+      var isShowTime =
+        index > 0 &&
+        (isShowAvatar ||
+          moment(parseInt(m.created_at)).format('hh:mm A') !=
+            moment(parseInt(messages[index - 1].created_at)).format('hh:mm A'));
+      if (isShowAvatar) isShowTime = true;
+
+      if (index == 0) {
+        messagesHTML.push(
+          <li>
+            <div
+              style={{
+                width: '100%',
+                height: '20px',
+                borderBottom: '1px solid #00000030',
+                textAlign: 'center'
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '16px',
+                  backgroundColor: '#F3F5F6',
+                  padding: '0 10px'
+                }}
+              >
+                {moment(m.created_at).format('LL')}
+              </span>
+            </div>
+          </li>
+        );
+
+        isShowAvatar = isShowTime = true;
+      }
+
+      if (
+        index > 0 &&
+        moment(m.created_at).format('LL') !=
+          moment(messages[index - 1].created_at).format('LL')
+      ) {
+        isShowAvatar = true;
+        messagesHTML.push(
+          <li>
+            <div
+              style={{
+                width: '100%',
+                height: '20px',
+                borderBottom: '1px solid #00000030',
+                textAlign: 'center'
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '16px',
+                  backgroundColor: '#F3F5F6',
+                  padding: '0 10px'
+                }}
+              >
+                {moment(m.created_at).format('LL')}
+              </span>
+            </div>
+          </li>
+        );
+      }
 
       if (userInfo) {
-        const className = userInfo.id == uid ? 'replies' : 'sent';
+        let className;
+
+        if (userInfo.id == uid) {
+          if (isShowAvatar) {
+            className = 'replies';
+          } else {
+            className = 'replies replie-no-avatar';
+          }
+        } else {
+          if (isShowAvatar) {
+            className = 'sent';
+          } else {
+            className = 'sent sent-no-avatar';
+          }
+        }
         messagesHTML.push(
           <li className={className} ref={index} key={index}>
-            <img
-              src={userInfo.avatar}
-              onClick={() => this.showDrawer(m.user)}
-            />
-            {m.is_file ? (
+            {isShowAvatar && (
               <img
-                className="image-msg img-rounded"
-                src={m.content}
-                onClick={() => this.showImageModal(m.content)}
+                src={userInfo.avatar}
+                onClick={() => this.showDrawer(m.user)}
               />
+            )}
+            {m.is_file ? (
+              <React.Fragment>
+                {isShowTime && (
+                  <h6>
+                    {moment(
+                      parseInt(m.updated_at ? m.updated_at : m.created_at)
+                    ).format('hh:mm A')}
+                  </h6>
+                )}
+                <img
+                  className="image-msg img-rounded"
+                  src={m.content}
+                  onClick={() => this.showImageModal(m.content)}
+                />
+              </React.Fragment>
             ) : (
               <div className="message-content">
-                <h6>{moment(parseInt(m.updated_at ? m.updated_at : m.created_at)).format('hh:mm A')}</h6>
+                {isShowTime && (
+                  <h6>
+                    {moment(
+                      parseInt(m.updated_at ? m.updated_at : m.created_at)
+                    ).format('hh:mm A')}
+                  </h6>
+                )}
                 <p>{m.content}</p>
               </div>
             )}

@@ -10,6 +10,7 @@ import ChatBox from './Layout/ChatBox';
 import * as roomService from './../services/room';
 import { withRouter } from 'react-router';
 import CreateRoomForm from './Room/CreateRoomForm';
+import moment from 'moment';
 
 var db;
 var firebase;
@@ -330,6 +331,7 @@ class Home extends React.Component {
   sendMessage = e => {
     const roomId = this.props.match.params.roomId;
     const content = document.getElementById('js-msg-content').value;
+    const now = moment().valueOf();
     if (
       ((e.type == 'keyup' && e.key === 'Enter') || e.type == 'click') &&
       content
@@ -338,7 +340,9 @@ class Home extends React.Component {
       var msgData = {
         user: userId,
         content: content,
-        is_notification: false
+        is_notification: false,
+        created_at: now,
+        updated_at: now
       };
       roomService.sendMessage(db, roomId, msgData);
       document.getElementById('js-msg-content').value = '';
@@ -419,13 +423,16 @@ class Home extends React.Component {
         // Upload completed successfully, now we can get the download URL
         uploadTask.snapshot.ref.getDownloadURL().then(function(downloadURL) {
           console.log('File available at', downloadURL);
+          const now = moment().valueOf();
 
           const userId = _this.state.user.uid;
           var msgData = {
             user: userId,
             content: downloadURL,
             is_notification: false,
-            is_file: true
+            is_file: true,
+            created_at: now,
+            updated_at: now
           };
 
           roomService.sendMessage(db, roomId, msgData);
