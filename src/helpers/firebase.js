@@ -6,6 +6,7 @@ import 'firebase/auth';
 import 'firebase/database';
 import 'firebase/firestore';
 import 'firebase/storage';
+import 'firebase/messaging';
 
 export default function setFirebaseConfig() {
   // Your web app's Firebase configuration

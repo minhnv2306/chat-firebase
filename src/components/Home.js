@@ -191,6 +191,29 @@ class Home extends React.Component {
     firebase = setFirebaseConfig();
     db = firebase.firestore();
 
+    // Retrieve Firebase Messaging object.
+    const messaging = firebase.messaging();
+
+    // Get Instance ID token. Initially this makes a network call, once retrieved
+    // subsequent calls to getToken will return from cache.
+    messaging
+      .requestPermission()
+      .then(function() {
+        console.log('Have permission');
+
+        return messaging.getToken();
+      })
+      .then(function(token) {
+        console.log(token);
+      })
+      .catch(function(err) {
+        console.log('Error occurred', err);
+      });
+
+    messaging.onMessage(function(payload) {
+      console.log('onMessage: ', payload);
+    });
+
     if (roomId) {
       this.getMessagesInRoomAndListenerSnapshot(roomId);
     }
