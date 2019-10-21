@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Drawer, Avatar, Progress, Modal } from 'antd';
+import moment from 'moment';
 
 const _ = require('underscore');
 
@@ -75,7 +76,10 @@ export default class ChatBox extends Component {
                 onClick={() => this.showImageModal(m.content)}
               />
             ) : (
-              <p>{m.content}</p>
+              <div className="message-content">
+                <h6>{moment(parseInt(m.updated_at ? m.updated_at : m.created_at)).format('hh:mm A')}</h6>
+                <p>{m.content}</p>
+              </div>
             )}
           </li>
         );
