@@ -51,3 +51,34 @@ exports.removeVulgarWords = functions.firestore
 
     return snapshot.after.ref.set(newVal);
   });
+
+// Ref: https://www.itwonders-web.com/blog/push-notification-using-firebase-demo-tutorial
+exports.sendNotificationWhenNewMessage = functions.firestore
+  .document('rooms/{room_id}')
+  .onUpdate(async (snapshot, context) => {
+    // const newVal = snapshot.after.data();
+    // const oldVal = snapshot.before.data();
+
+    const payload = {
+      data: {
+        notification: JSON.stringify({
+          title: 'Firebase',
+          body: 'Firebase is awesome',
+          click_action: 'http://localhost:3000/',
+          icon:
+            'https://www.saremcotech.com/wp-content/uploads/2018/07/firebase-icon.png'
+        })
+      }
+    };
+
+    console.log(payload);
+    const response = await admin
+      .messaging()
+      .sendToDevice(
+        [
+          'cfIrXSLMJia7osLU7OjG0H:APA91bFBNIZ1w4Am2rrke6lKxey4EvSct9cMqLNrz5S8-VoUhDulFl2xs0U9dZ3iEmpEowtoAOOZ7CbO8-B1cZNRrxZ0x1NQEKb-l_NFkcmECdbEguqO_hA80XU3HQmVLdh0cEBM6KWW'
+        ],
+        payload
+      );
+    return Promise.all([1, 2]);
+  });
