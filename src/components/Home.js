@@ -27,6 +27,7 @@ class Home extends React.Component {
     ...initRoomInfoState,
     user: {},
     rooms: [],
+    roomEffect: '',
     visibleCreateRoom: false,
     myFriends: [],
     percentUploadFile: 0
@@ -176,7 +177,8 @@ class Home extends React.Component {
       rooms[indexRoom].unReadMessageNumber = 0;
 
       this.setState({
-        rooms
+        rooms,
+        roomEffect: roomId
       });
 
       // Restart state for new room
@@ -293,7 +295,8 @@ class Home extends React.Component {
                   }
 
                   _this.setState({
-                    rooms: [..._this.state.rooms, room]
+                    rooms: [..._this.state.rooms, room],
+                    roomEffect: _this.props.match.params.roomId
                   });
                 }
                 if (change.type === 'modified') {
@@ -310,7 +313,8 @@ class Home extends React.Component {
                       room.messages.length - rooms[indexRoom].messages.length;
 
                     _this.setState({
-                      rooms
+                      rooms,
+                      roomEffect: room.id
                     });
                   }
                 }
@@ -512,6 +516,7 @@ class Home extends React.Component {
                         members={this.state.members}
                         uid={this.state.user.uid}
                         progress={this.state.percentUploadFile}
+                        roomEffect={this.state.roomEffect}
                       />
                     </div>
                     <div className="message-input">
