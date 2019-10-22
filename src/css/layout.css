@@ -867,6 +867,7 @@ html {
 .image-msg {
   width: 150px !important;
   border-radius: 0% !important;
+  padding-bottom: 7px;
 }
 
 .file {
@@ -931,4 +932,14 @@ html {
 
 .ant-scroll-number {
   margin-top: 15px;
+}
+
+.sent-no-avatar {
+  padding-left: 30px;
+  margin-top: 0px !important;
+}
+
+.replie-no-avatar {
+  padding-right: 30px;
+  margin-top: 0px !important;
 }
