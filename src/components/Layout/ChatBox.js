@@ -78,7 +78,6 @@ class ChatBox extends Component {
         index > 0 &&
         (isDifferentUser(m, messages[index - 1]) ||
           isDifferentFormatHourAndMinute(m, messages[index - 1]));
-      if (isShowAvatar) isShowTime = true;
 
       if (index == 0) {
         messagesHTML.push(generateDateLine(m.created_at));
@@ -91,6 +90,7 @@ class ChatBox extends Component {
 
         isShowAvatar = true;
       }
+      if (isShowAvatar || isShowTime) isShowTime = isShowAvatar = true;
 
       if (userInfo) {
         // Set class name for the message
