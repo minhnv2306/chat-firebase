@@ -1,6 +1,7 @@
 import moment from 'moment';
 import React from 'react';
 import { Row, Col } from 'antd';
+import { generateRoomId } from './function';
 
 export function isDifferentUser(firstMessage, secondMessage) {
   return firstMessage.user != secondMessage.user;
@@ -22,13 +23,16 @@ export function isDifferentFormatHourAndMinute(firstMessage, secondMessage) {
 
 export function generateDateLine(time) {
   return (
-    <li>
+    <li key={generateRoomId()}>
       <Row className="date__line">
-        <Col span={10} className="line-left"><hr/>
+        <Col span={10} className="line-left">
+          <hr />
         </Col>
-        <Col span={4} className="date">{moment(time).format("LL")}
+        <Col span={4} className="date">
+          {moment(time).format('LL')}
         </Col>
-        <Col span={10} className="line-right"><hr/>
+        <Col span={10} className="line-right">
+          <hr />
         </Col>
       </Row>
     </li>

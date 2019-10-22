@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Drawer, Avatar, Progress, Modal } from 'antd';
 import moment from 'moment';
+import { withRouter } from 'react-router';
 import {
   isDifferentUser,
   isDifferentDate,
@@ -10,7 +11,7 @@ import {
 
 const _ = require('underscore');
 
-export default class ChatBox extends Component {
+class ChatBox extends Component {
   state = {
     visible: false,
     member: {},
@@ -21,11 +22,13 @@ export default class ChatBox extends Component {
   componentDidUpdate() {
     var maxLength = this.props.messages.length;
 
-    if (this.refs[maxLength - 1]) {
-      this.refs[maxLength - 1].scrollIntoView({
-        behavior: 'smooth',
-        block: 'end'
-      });
+    if (this.props.roomEffect == this.props.match.params.roomId) {
+      if (this.refs[maxLength - 1]) {
+        this.refs[maxLength - 1].scrollIntoView({
+          behavior: 'smooth',
+          block: 'end'
+        });
+      }
     }
   }
 
@@ -190,3 +193,5 @@ export default class ChatBox extends Component {
     );
   }
 }
+
+export default withRouter(ChatBox);
