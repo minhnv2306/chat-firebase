@@ -1,6 +1,12 @@
 import React, { Component } from 'react';
 import { Drawer, Avatar, Progress, Modal } from 'antd';
 import moment from 'moment';
+import {
+  isDifferentUser,
+  isDifferentDate,
+  isDifferentFormatHourAndMinute,
+  generateDateLine
+} from '../../helpers/message';
 
 const _ = require('underscore');
 
@@ -61,73 +67,30 @@ export default class ChatBox extends Component {
 
     messages.map((m, index) => {
       var userInfo = _.findWhere(members, { id: m.user });
-      var isShowAvatar =
-        index > 0 && messages[index].user != messages[index - 1].user;
-      var isShowTime =
+      let isShowAvatar, isShowTime;
+
+      // Set show avatar and show time of the message
+      isShowAvatar = index > 0 && isDifferentUser(m, messages[index - 1]);
+      isShowTime =
         index > 0 &&
-        (isShowAvatar ||
-          moment(parseInt(m.created_at)).format('hh:mm A') !=
-            moment(parseInt(messages[index - 1].created_at)).format('hh:mm A'));
+        (isDifferentUser(m, messages[index - 1]) ||
+          isDifferentFormatHourAndMinute(m, messages[index - 1]));
       if (isShowAvatar) isShowTime = true;
 
       if (index == 0) {
-        messagesHTML.push(
-          <li>
-            <div
-              style={{
-                width: '100%',
-                height: '20px',
-                borderBottom: '1px solid #00000030',
-                textAlign: 'center'
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '16px',
-                  backgroundColor: '#F3F5F6',
-                  padding: '0 10px'
-                }}
-              >
-                {moment(m.created_at).format('LL')}
-              </span>
-            </div>
-          </li>
-        );
+        messagesHTML.push(generateDateLine(m.created_at));
 
         isShowAvatar = isShowTime = true;
       }
 
-      if (
-        index > 0 &&
-        moment(m.created_at).format('LL') !=
-          moment(messages[index - 1].created_at).format('LL')
-      ) {
+      if (index > 0 && isDifferentDate(m, messages[index - 1])) {
+        messagesHTML.push(generateDateLine(m.created_at));
+
         isShowAvatar = true;
-        messagesHTML.push(
-          <li>
-            <div
-              style={{
-                width: '100%',
-                height: '20px',
-                borderBottom: '1px solid #00000030',
-                textAlign: 'center'
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '16px',
-                  backgroundColor: '#F3F5F6',
-                  padding: '0 10px'
-                }}
-              >
-                {moment(m.created_at).format('LL')}
-              </span>
-            </div>
-          </li>
-        );
       }
 
       if (userInfo) {
+        // Set class name for the message
         let className;
 
         if (userInfo.id == uid) {
@@ -143,6 +106,7 @@ export default class ChatBox extends Component {
             className = 'sent sent-no-avatar';
           }
         }
+
         messagesHTML.push(
           <li className={className} ref={index} key={index}>
             {isShowAvatar && (
