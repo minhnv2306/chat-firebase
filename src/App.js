@@ -2,7 +2,8 @@ import React from 'react';
 import './App.css';
 import Home from './components/Home';
 import Login from './components/Login';
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import TimeLine from './components/TimeLine';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 
 function App() {
   return (
@@ -13,6 +14,9 @@ function App() {
         </Route>
         <Route path="/rooms/:roomId">
           <Home />
+        </Route>
+        <Route path="/git-time-line">
+          <TimeLine />
         </Route>
         <Route path="/">
           <Home />

@@ -198,6 +198,12 @@ export default class Header extends Component {
     }));
     message.success('Accept successfully');
   };
+
+  openInNewTab = url => {
+    var win = window.open(url, '_blank');
+    win.focus();
+  };
+
   render() {
     const data = this.state.invites;
     const menu = (
@@ -337,7 +343,16 @@ export default class Header extends Component {
               </Col>
             </Row>
           </Col>
-          <Col span={5} />
+          <Col span={5}>
+            <Button
+              type="primary"
+              size="large"
+              style={{ marginTop: '3px' }}
+              onClick={() => this.openInNewTab('/git-time-line')}
+            >
+              View git history
+            </Button>
+          </Col>
         </Row>
       </div>
     );

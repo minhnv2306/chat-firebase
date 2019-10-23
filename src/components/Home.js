@@ -567,7 +567,7 @@ class Home extends React.Component {
                   </h3>
                   <img className="home-avatar" src={this.state.user.photoURL} />
                   <p className="home-title">
-                    Select a room to start conversation{' '}
+                    Select a room to start conversation
                   </p>
                   <div className="home-footer">
                     <p>

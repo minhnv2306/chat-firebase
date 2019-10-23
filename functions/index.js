@@ -3,6 +3,8 @@ const functions = require('firebase-functions');
 
 // The Firebase Admin SDK to access the Firebase Realtime Database.
 const admin = require('firebase-admin');
+const moment = require('moment');
+
 admin.initializeApp();
 
 // Take the text parameter passed to this HTTP endpoint and insert it into the
@@ -141,3 +143,26 @@ exports.sendNotificationWhenNewMessage = functions.firestore
     req.write(data);
     req.end();
   });
+
+exports.followGitAction = functions.https.onRequest(async (req, res) => {
+  const payload = req.body;
+  const snapshot = await admin
+    .database()
+    .ref('git')
+    .push({
+      content:
+        payload.repository.owner.name +
+        ' pushed on your ' +
+        payload.repository.name +
+        ' repository',
+      user_avatar: payload.repository.owner.avatar_url,
+      user_name: payload.repository.owner.name,
+      click_action: payload.compare,
+      created_at: moment().valueOf()
+    });
+
+  // Redirect with 303 SEE OTHER to the URL of the pushed object in the Firebase console.
+  res.json({
+    status: 'OK'
+  });
+});
