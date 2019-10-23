@@ -52,33 +52,92 @@ exports.removeVulgarWords = functions.firestore
     return snapshot.after.ref.set(newVal);
   });
 
-// Ref: https://www.itwonders-web.com/blog/push-notification-using-firebase-demo-tutorial
+function getAccessToken() {
+  var MESSAGING_SCOPE = 'https://www.googleapis.com/auth/firebase.messaging';
+  var SCOPES = [MESSAGING_SCOPE];
+
+  return new Promise(function(resolve, reject) {
+    var { google } = require('googleapis');
+    var key = require('./service-account.json');
+    var jwtClient = new google.auth.JWT(
+      key.client_email,
+      null,
+      key.private_key,
+      SCOPES,
+      null
+    );
+    jwtClient.authorize(function(err, tokens) {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(tokens.access_token);
+    });
+  });
+}
+
+/* Ref: 
+ https://www.itwonders-web.com/blog/push-notification-using-firebase-demo-tutorial
+ https://medium.com/@ThatJenPerson/authenticating-firebase-cloud-messaging-http-v1-api-requests-e9af3e0827b8
+ make request with https: https://nodejs.dev/making-http-requests-with-nodejs
+*/
 exports.sendNotificationWhenNewMessage = functions.firestore
   .document('rooms/{room_id}')
   .onUpdate(async (snapshot, context) => {
-    // const newVal = snapshot.after.data();
+    const newVal = snapshot.after.data();
     // const oldVal = snapshot.before.data();
 
-    const payload = {
-      data: {
-        notification: JSON.stringify({
-          title: 'Firebase',
-          body: 'Firebase is awesome',
-          click_action: 'http://localhost:3000/',
-          icon:
-            'https://www.saremcotech.com/wp-content/uploads/2018/07/firebase-icon.png'
-        })
+    const accessToken = await getAccessToken();
+    var PROJECT_ID = 'my-first-firebase-projec-6cf07';
+    var HOST = 'fcm.googleapis.com';
+    var PATH = '/v1/projects/' + PROJECT_ID + '/messages:send';
+
+    var https = require('https');
+    var data = JSON.stringify({
+      message: {
+        token:
+          'cfIrXSLMJia7osLU7OjG0H:APA91bFBNIZ1w4Am2rrke6lKxey4EvSct9cMqLNrz5S8-VoUhDulFl2xs0U9dZ3iEmpEowtoAOOZ7CbO8-B1cZNRrxZ0x1NQEKb-l_NFkcmECdbEguqO_hA80XU3HQmVLdh0cEBM6KWW',
+        notification: {
+          title: 'Sky team',
+          body: 'This is a message from FCM'
+        },
+        webpush: {
+          headers: {
+            Urgency: 'high',
+            TTL: '86400'
+          },
+          notification: {
+            body: 'You have new message in the room',
+            requireInteraction: 'true',
+            icon:
+              'https://www.saremcotech.com/wp-content/uploads/2018/07/firebase-icon.png',
+            click_action: `http://localhost:3000/rooms/${newVal.id}`
+          }
+        }
+      }
+    });
+
+    var options = {
+      hostname: HOST,
+      path: PATH,
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + accessToken,
+        'Content-Type': 'application/json',
+        'Content-Length': data.length
       }
     };
 
-    console.log(payload);
-    const response = await admin
-      .messaging()
-      .sendToDevice(
-        [
-          'cfIrXSLMJia7osLU7OjG0H:APA91bFBNIZ1w4Am2rrke6lKxey4EvSct9cMqLNrz5S8-VoUhDulFl2xs0U9dZ3iEmpEowtoAOOZ7CbO8-B1cZNRrxZ0x1NQEKb-l_NFkcmECdbEguqO_hA80XU3HQmVLdh0cEBM6KWW'
-        ],
-        payload
-      );
-    return Promise.all([1, 2]);
+    var req = https.request(options, function(res) {
+      res.setEncoding('utf8');
+      res.on('data', function(chunk) {
+        console.log('BODY: ' + chunk);
+      });
+    });
+
+    req.on('error', function(e) {
+      console.log('problem with request: ' + e.message);
+    });
+    req.write(data);
+    req.end();
   });

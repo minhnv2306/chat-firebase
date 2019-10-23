@@ -10,6 +10,7 @@ import {
 } from '../../helpers/message';
 
 const _ = require('underscore');
+let isReceiveProps = false;
 
 class ChatBox extends Component {
   state = {
@@ -19,10 +20,18 @@ class ChatBox extends Component {
     imageMessageURL: ''
   };
 
+  componentWillReceiveProps() {
+    isReceiveProps = true;
+  }
+
   componentDidUpdate() {
     var maxLength = this.props.messages.length;
 
-    if (this.props.roomEffect == this.props.match.params.roomId) {
+    if (
+      this.props.roomEffect == this.props.match.params.roomId &&
+      isReceiveProps
+    ) {
+      isReceiveProps = false;
       if (this.refs[maxLength - 1]) {
         this.refs[maxLength - 1].scrollIntoView({
           behavior: 'smooth',
