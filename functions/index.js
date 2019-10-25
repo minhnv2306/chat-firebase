@@ -170,12 +170,13 @@ exports.followGitAction = functions.https.onRequest(async (req, res) => {
 exports.sendNotificationWhenRequestAddFriend = functions.firestore
   .document('users/{user_id}')
   .onUpdate(async (snapshot, context) => {
+    const oldUser = snapshot.before.data();
     const user = snapshot.after.data();
     const userChange = user.id;
     const diviceUserRequest = user.device_token;
     const userIdSendRequest = user.requests.slice(-1).pop();
 
-    if (diviceUserRequest) {
+    if (diviceUserRequest && oldUser.requests.length !== user.requests.length) {
       const accessToken = await getAccessToken();
       var PROJECT_ID = 'my-first-firebase-projec-6cf07';
       var HOST = 'fcm.googleapis.com';
