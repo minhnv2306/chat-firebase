@@ -207,7 +207,33 @@ class Home extends React.Component {
         return messaging.getToken();
       })
       .then(function(token) {
-        console.log(token);
+        firebase.auth().onAuthStateChanged(function(user) {
+          if (user) {
+            db.collection("users")
+              .where("id", "==", user.uid)
+              .get()
+              .then(function(querySnapshot) {
+                querySnapshot.forEach(function(doc) {
+                  const docRef = db.collection("users").doc(doc.id);
+                  docRef.get().then(function(subdoc) {
+                    const userObj = subdoc.data();
+                    if (!userObj.device_token) {
+                      userObj.device_token = [token];
+                      docRef.set(userObj);
+                    }
+
+                    if (!userObj.device_token.includes(token)) {
+                      userObj.device_token.push(token);
+                    }
+
+                    docRef.update({
+                      device_token: userObj.device_token
+                    });
+                  });
+                });
+              });
+          }
+        });
       })
       .catch(function(err) {
         console.log('Error occurred', err);
