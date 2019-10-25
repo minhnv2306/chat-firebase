@@ -231,3 +231,28 @@ exports.sendNotificationWhenRequestAddFriend = functions.firestore
       });
     }
   });
+
+exports.getMessages = functions.https.onRequest(async (req, res) => {
+  const snapshot = await admin
+    .firestore()
+    .collection("rooms")
+    .where('id', '==', '3ebqhf3tjvmukikofa5vyl')
+    .get();
+  console.log(snapshot);
+  console.log(snapshot.docs.length);
+
+  const id = await snapshot.docs[0].id;
+  const doc = snapshot.docs[0];
+  const subDocs = await admin
+    .firestore()
+    .collection("rooms")
+    .doc(id)
+    .collection("messages")
+    .get();
+  console.log(subDocs.docs[0].data());
+
+  // Redirect with 303 SEE OTHER to the URL of the pushed object in the Firebase console.
+  res.json({
+    status: 'OK'
+  });
+});
