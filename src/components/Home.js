@@ -45,83 +45,98 @@ class Home extends React.Component {
     });
   };
 
-  changeDirectRoomNameAndAvatar(room) {
-    const _this = this;
-    const myFriend = _.reject(room.members, { user: _this.state.user.uid });
+  async changeDirectRoomNameAndAvatar(room) {
+    const myFriend = _.reject(room.members, { user: this.state.user.uid });
     const roomId = this.props.match.params.roomId;
+    const user = await this.getUserInfo(myFriend[0].user);
+    const rooms = this.state.rooms;
+    const indexDirectRoom = _.findIndex(rooms, function(r) {
+      return r.id == room.id;
+    });
 
-    db.collection('users')
-      .where('id', '==', myFriend[0].user)
-      .get()
-      .then(function(snapshot) {
-        if (snapshot.docs[0]) {
-          let user = snapshot.docs[0].data();
-          let rooms = _this.state.rooms;
-          const indexDirectRoom = _.findIndex(rooms, function(r) {
-            return r.id == room.id;
-          });
+    if (user && rooms.length > 0) {
+      rooms[indexDirectRoom].name = user.name;
+      rooms[indexDirectRoom].avatar = user.avatar;
 
-          rooms[indexDirectRoom].name = user.name;
-          rooms[indexDirectRoom].avatar = user.avatar;
-
-          _this.setState({
-            rooms: rooms
-          });
-
-          if (roomId == room.id) {
-            _this.setState({
-              roomInfo: {
-                name: user.name,
-                avatar: user.avatar
-              }
-            });
-          }
-        }
+      this.setState({
+        rooms: rooms
       });
+
+      if (roomId == room.id) {
+        this.setState({
+          roomInfo: {
+            name: user.name,
+            avatar: user.avatar
+          }
+        });
+      }
+    }
+  };
+  
+  async getRoomInfo(roomId) {
+    const roomInfo = await db.collection('rooms')
+      .where('id', '==', roomId)
+      .get();
+
+    if (roomInfo.docs[0]) {
+      return roomInfo.docs[0].data();
+    } else {
+      return null;
+    }
   }
 
-  getMessagesInRoomAndListenerSnapshot(roomId) {
+  async getMembersInfoInTheRoom(room) {
+    var members = room.members;
+    var result = [];
+
+    for (let i = 0; i < members.length; i++) {
+      var user = await db
+        .collection('users')
+        .where('id', '==', members[i].user)
+        .get();
+
+      result.push(user.docs[0].data());
+    }
+
+    return result;
+  }
+
+  async getFilesInTheRoom(roomId) {
+    // Get all files of the room
+    // Ref: https://firebase.google.com/docs/storage/web/list-files
+
+    var listRef = await firebase.storage().ref().child('images/' + roomId).listAll();
+    var result = [];
+
+    for (let i = 0; i < listRef.items.length; i++) {
+      var image = await listRef.items[i].getDownloadURL()
+
+      result.push(image);
+    }
+
+    return result;
+  }
+
+  async getMessagesInRoomAndListenerSnapshot(roomId) {
     const _this = this;
 
-    db.collection('rooms')
-      .where('id', '==', roomId)
-      .get()
-      .then(function(snapshot) {
-        snapshot.forEach(function(doc) {
-          let room = doc.data();
+    const room = await this.getRoomInfo(roomId);
+    
+    if (room.type == 2) {
+      _this.changeDirectRoomNameAndAvatar(room);
+    }
 
-          if (room.type == 2) {
-            _this.changeDirectRoomNameAndAvatar(room);
-          }
+    const membersInfo = await this.getMembersInfoInTheRoom(room);
+    const images = await this.getFilesInTheRoom(roomId);
 
-          var members = doc.data().members;
-
-          members.map(async m => {
-            var user = await db
-              .collection('users')
-              .where('id', '==', m.user)
-              .get();
-
-            if (
-              user.docs[0] &&
-              _.findWhere(_this.state.members, {
-                id: user.docs[0].data().id
-              }) == undefined
-            ) {
-              _this.setState({
-                members: [..._this.state.members, user.docs[0].data()]
-              });
-            }
-          });
-
-          _this.setState({
-            roomInfo: {
-              name: doc.data().name,
-              avatar: doc.data().avatar
-            }
-          });
-        });
-      });
+    _this.setState({
+      roomInfo: {
+        name: room.name,
+        avatar: room.avatar,
+      },
+      members: membersInfo,
+      images: images
+    });
 
     db.collection('rooms')
       .where('id', '==', roomId)
@@ -135,33 +150,6 @@ class Home extends React.Component {
             });
           }
         });
-      });
-
-    var storage = firebase.storage();
-    // Create a storage reference from our storage service
-    var storageRef = storage.ref();
-    // Create a reference under which you want to list
-    var listRef = storageRef.child('images/' + roomId);
-
-    // Find all the prefixes and items.
-    listRef
-      .listAll()
-      .then(function(res) {
-        res.prefixes.forEach(function(folderRef) {
-          // All the prefixes under listRef.
-          // You may call listAll() recursively on them.
-        });
-        res.items.forEach(function(itemRef) {
-          // All the items under listRef.
-          itemRef.getDownloadURL().then(function(downloadURL) {
-            _this.setState({
-              images: [..._this.state.images, downloadURL]
-            });
-          });
-        });
-      })
-      .catch(function(error) {
-        // Uh-oh, an error occurred!
       });
   }
 
@@ -185,128 +173,138 @@ class Home extends React.Component {
       this.setState(initRoomInfoState);
       this.getMessagesInRoomAndListenerSnapshot(roomId);
     }
+  };
+
+  async getDeviceToken(messaging) {
+    try {
+      let token = await messaging.requestPermission();
+
+      return messaging.getToken();
+    }  catch(e) {
+      console.log(e);
+    }
+  };
+
+  async getUserInfo(userId) {
+    let user = await db.collection('users')
+      .where('id', '==', userId)
+      .get();
+
+    if (user.docs[0]) {
+      return user.docs[0].data()
+    } else {
+      return null;
+    }
+  }
+  async getFriendsOfCurrentUser(userId) {
+    let user = await this.getUserInfo(userId);
+    let result = [];
+
+    if (user.friends.length > 0) {
+      let friends = user.friends;
+
+      for (let i = 0; i < friends.length; i++) {
+        let friendTmp = await this.getUserInfo(friends[i]);
+
+        if (friendTmp) {
+          result.push({
+            id: friendTmp.id,
+            name: friendTmp.name,
+            email: friendTmp.email
+          });
+        }
+      }
+    }
+
+    return result;
   }
 
-  componentDidMount() {
+  async addUserIntoUserTable(user) {
+    try {
+      let userDB = await db.collection('users')
+        .where('id', '==', user.uid)
+        .get();
+
+      if (userDB.size == 0) {
+        db.collection('users').add({
+          id: user.uid,
+          name: user.displayName,
+          email: user.email,
+          avatar: user.photoURL,
+          friends: [],
+          requests: []
+        });
+      }
+    } catch (e) {
+      console.log('Some error when add user into user table ', e);
+    }
+  }
+  async componentDidMount() {
     const _this = this;
     const roomId = this.props.match.params.roomId;
 
     firebase = setFirebaseConfig();
     db = firebase.firestore();
 
+    /*
     // Retrieve Firebase Messaging object.
     const messaging = firebase.messaging();
 
-    // Get Instance ID token. Initially this makes a network call, once retrieved
-    // subsequent calls to getToken will return from cache.
-    messaging
-      .requestPermission()
-      .then(function() {
-        console.log('Have permission');
+    const token = await this.getDeviceToken(messaging);
 
-        return messaging.getToken();
-      })
-      .then(function(token) {
-        firebase.auth().onAuthStateChanged(function(user) {
-          if (user) {
-            db.collection("users")
-              .where("id", "==", user.uid)
-              .get()
-              .then(function(querySnapshot) {
-                querySnapshot.forEach(function(doc) {
-                  const docRef = db.collection("users").doc(doc.id);
-                  docRef.get().then(function(subdoc) {
-                    const userObj = subdoc.data();
-                    if (!userObj.device_token) {
-                      userObj.device_token = [token];
-                      docRef.set(userObj);
-                    }
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        db.collection("users")
+          .where("id", "==", user.uid)
+          .get()
+          .then(function(querySnapshot) {
+            querySnapshot.forEach(function(doc) {
+              const docRef = db.collection("users").doc(doc.id);
+              docRef.get().then(function(subdoc) {
+                const userObj = subdoc.data();
+                if (!userObj.device_token) {
+                  userObj.device_token = [token];
+                  docRef.set(userObj);
+                }
 
-                    if (!userObj.device_token.includes(token)) {
-                      userObj.device_token.push(token);
-                    }
+                if (!userObj.device_token.includes(token)) {
+                  userObj.device_token.push(token);
+                }
 
-                    docRef.update({
-                      device_token: userObj.device_token
-                    });
-                  });
+                docRef.update({
+                  device_token: userObj.device_token
                 });
               });
-          }
-        });
-      })
-      .catch(function(err) {
-        console.log('Error occurred', err);
-      });
+            });
+          });
+      }
+    });
 
     messaging.onMessage(function(payload) {
       console.log('onMessage: ', payload);
     });
+    */
 
     if (roomId) {
       this.getMessagesInRoomAndListenerSnapshot(roomId);
     }
 
-    firebase.auth().onAuthStateChanged(function(user) {
+    firebase.auth().onAuthStateChanged(async function(user) {
       if (user) {
         // User is signed in.
+
+        let friends = await _this.getFriendsOfCurrentUser(user.uid);
         _this.setState({
+          myFriends: friends,
           user: {
             name: user.displayName,
             email: user.email,
             photoURL: user.photoURL,
             uid: user.uid
           }
-        });
+        })
 
-        db.collection('users')
-          .where('id', '==', user.uid)
-          .get()
-          .then(function(snapshot) {
-            if (snapshot.size == 0) {
-              db.collection('users').add({
-                id: user.uid,
-                name: user.displayName,
-                email: user.email,
-                avatar: user.photoURL,
-                friends: [],
-                requests: []
-              });
-            }
-          });
-
-        db.collection('users')
-          .where('id', '==', user.uid)
-          .get()
-          .then(function(snapshot) {
-            if (snapshot.size > 0) {
-              let currentUserInfo = snapshot.docs[0].data();
-
-              if (currentUserInfo.friends.length > 0) {
-                let friends = currentUserInfo.friends;
-
-                friends.map(function(uid) {
-                  db.collection('users')
-                    .where('id', '==', uid)
-                    .get()
-                    .then(function(snapshot) {
-                      if (snapshot.docs[0]) {
-                        let userTmp = snapshot.docs[0].data();
-                        let friendTmp = {
-                          id: userTmp.id,
-                          name: userTmp.name,
-                          email: userTmp.email
-                        };
-
-                        _this.setState({
-                          myFriends: [..._this.state.myFriends, friendTmp]
-                        });
-                      }
-                    });
-                });
-              }
-            }
-          });
+        await _this.addUserIntoUserTable(user);
 
         db.collection('rooms')
           .where('check_members', 'array-contains', user.uid)
